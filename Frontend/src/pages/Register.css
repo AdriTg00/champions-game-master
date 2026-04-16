@@ -1,0 +1,92 @@
+/* ---------------------- */
+/*    REGISTER SCREEN STYLES */
+/* ---------------------- */
+/* Hace que el login/register siempre esté centrado */
+.auth-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #1c2333 0%, #0d111a 85%);
+  z-index: 9999;
+}
+
+
+.auth-card {
+  width: 360px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  animation: pop 0.5s ease forwards;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.auth-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px #00c6ff;
+}
+
+/* Inputs */
+.auth-card label {
+  display: block;
+  margin-top: 15px;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: 0.25s;
+}
+
+.auth-card input:focus {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 10px #00c6ff;
+}
+
+/* Botones */
+.auth-card button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0099ff, #00eaff);
+  color: #0d111a;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.25s;
+  box-shadow: 0 4px 12px rgba(0, 204, 255, 0.4);
+}
+
+.auth-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 204, 255, 0.55);
+}
+
+.auth-card button:nth-child(2) {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-card button:nth-child(2):hover {
+  background: rgba(255, 255, 255, 0.25);
+}

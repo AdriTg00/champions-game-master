@@ -1,0 +1,332 @@
+/* ======= PODIO 3D ANIMADO ======= */
+
+.ranking {
+  padding-top: 40px;
+  color: white;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.ranking-title {
+  font-size: 32px;
+  color: #ff00e6;
+  text-shadow: 
+    0 0 10px #ff00e6,
+    0 0 20px #ff00e6,
+    0 0 30px #ff33ee;
+  animation: titlePulse 3s infinite;
+  margin-bottom: 60px;
+}
+
+@keyframes titlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* CONTENEDOR DEL PODIO */
+.podium-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  margin: 60px auto;
+  perspective: 1000px;
+  max-width: 900px;
+}
+
+/* LUGARES DEL PODIO */
+.podium-place {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  animation: podiumEntrance 1s ease-out;
+}
+
+@keyframes podiumEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(100px) rotateX(-20deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+}
+
+/* PRIMER LUGAR */
+.first-place {
+  order: 2;
+  animation-delay: 0.4s;
+  z-index: 3;
+}
+
+/* SEGUNDO LUGAR */
+.second-place {
+  order: 1;
+  animation-delay: 0.2s;
+  z-index: 2;
+}
+
+/* TERCER LUGAR */
+.third-place {
+  order: 3;
+  animation-delay: 0s;
+  z-index: 1;
+}
+
+/* MEDALLAS */
+.medal {
+  font-size: 50px;
+  position: absolute;
+  top: -30px;
+  z-index: 10;
+  animation: medalFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 5px 15px rgba(255, 215, 0, 0.6));
+}
+
+@keyframes medalFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(10deg); }
+}
+
+.gold-medal {
+  animation: medalFloat 3s ease-in-out infinite, goldShine 2s infinite;
+}
+
+@keyframes goldShine {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)); }
+  50% { filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)); }
+}
+
+.silver-medal {
+  filter: drop-shadow(0 5px 15px rgba(192, 192, 192, 0.6));
+}
+
+.bronze-medal {
+  filter: drop-shadow(0 5px 15px rgba(205, 127, 50, 0.6));
+}
+
+/* CORONA DEL GANADOR */
+.crown {
+  font-size: 40px;
+  position: absolute;
+  top: -70px;
+  animation: crownBounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+}
+
+@keyframes crownBounce {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+/* IMAGEN DEL JUEGO EN EL PODIO */
+.game-card-podium {
+  width: 180px;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #ff00e6;
+  box-shadow: 
+    0 0 20px rgba(255, 0, 230, 0.6),
+    0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.first-place .game-card-podium {
+  width: 200px;
+  height: 260px;
+  border-color: #ffd700;
+  box-shadow: 
+    0 0 30px rgba(255, 215, 0, 0.8),
+    0 15px 40px rgba(0, 0, 0, 0.6);
+}
+
+.game-card-podium:hover {
+  transform: scale(1.1) rotateY(5deg);
+}
+
+.game-card-podium img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* INFO DEL PODIO */
+.podium-info {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.podium-info h3 {
+  font-size: 24px;
+  color: #ff00e6;
+  margin: 5px 0;
+  text-shadow: 0 0 10px #ff00e6;
+}
+
+.first-place .podium-info h3 {
+  font-size: 32px;
+  color: #ffd700;
+  text-shadow: 0 0 20px #ffd700;
+}
+
+.podium-info p {
+  font-size: 14px;
+  color: #a7a7ff;
+  margin: 5px 0;
+}
+
+/* BASES DEL PODIO 3D */
+.podium-base {
+  width: 180px;
+  height: 120px;
+  background: linear-gradient(135deg, rgba(60, 0, 120, 0.8), rgba(20, 0, 60, 0.9));
+  border: 2px solid #ff00e6;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 0 20px rgba(255, 0, 230, 0.4),
+    inset 0 -30px 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.first-base {
+  width: 200px;
+  height: 160px;
+  background: linear-gradient(135deg, rgba(80, 0, 160, 0.9), rgba(40, 0, 100, 1));
+  border-color: #ffd700;
+  box-shadow: 
+    0 0 30px rgba(255, 215, 0, 0.6),
+    inset 0 -40px 60px rgba(0, 0, 0, 0.6);
+  animation: firstPlacePulse 3s infinite;
+}
+
+@keyframes firstPlacePulse {
+  0%, 100% { 
+    box-shadow: 
+      0 0 30px rgba(255, 215, 0, 0.6),
+      inset 0 -40px 60px rgba(0, 0, 0, 0.6);
+  }
+  50% { 
+    box-shadow: 
+      0 0 50px rgba(255, 215, 0, 1),
+      inset 0 -40px 60px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.second-base {
+  height: 100px;
+  background: linear-gradient(135deg, rgba(50, 0, 100, 0.8), rgba(20, 0, 50, 0.9));
+}
+
+.third-base {
+  height: 80px;
+  background: linear-gradient(135deg, rgba(40, 0, 80, 0.7), rgba(15, 0, 40, 0.8));
+}
+
+/* EFECTO 3D EN LAS BASES */
+.podium-base::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(255, 0, 230, 0.5),
+    transparent
+  );
+  animation: baseScan 3s linear infinite;
+}
+
+@keyframes baseScan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* TÍTULO "OTROS JUEGOS" */
+.rest-title {
+  font-size: 24px;
+  color: #a7a7ff;
+  margin: 60px 0 30px;
+  text-shadow: 0 0 10px #6a33ff;
+}
+
+/* BOTÓN REINICIAR */
+.restart-button {
+  margin-top: 50px;
+  padding: 18px 36px;
+  font-size: 16px;
+  background-color: #240046;
+  color: #ff00e6;
+  border: 2px solid #ff00e6;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow:
+    0 0 10px #ff00e6,
+    0 0 20px #ff00e6 inset;
+  transition: all 0.3s ease;
+  animation: buttonGlow 2s infinite;
+}
+
+@keyframes buttonGlow {
+  0%, 100% { 
+    box-shadow: 0 0 10px #ff00e6, 0 0 20px #ff00e6 inset;
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 20px #ff33ee, 0 0 30px #ff33ee inset;
+    transform: scale(1.05);
+  }
+}
+
+.restart-button:hover {
+  background-color: #ff00e6;
+  color: #240046;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 30px #ff00e6 !important;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .podium-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .podium-place {
+    width: 100%;
+  }
+
+  .first-place {
+    order: 1;
+  }
+
+  .second-place {
+    order: 2;
+  }
+
+  .third-place {
+    order: 3;
+  }
+
+  .podium-base {
+    width: 250px;
+  }
+
+  .first-base {
+    width: 280px;
+  }
+}

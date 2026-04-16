@@ -1,0 +1,37 @@
+name: Mutation Testing
+
+on:
+  push:
+    branches: [ Rama-Adrian ]
+  pull_request:
+    branches: [ Rama-Adrian ]
+
+
+jobs:
+  mutation-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./Frontend  # ajusta si tu carpeta se llama distinto
+
+      - name: Run mutation tests
+        run: npx stryker run
+        working-directory: ./Frontend
+
+      - name: Upload mutation report
+        uses: actions/upload-artifact@v3
+        with:
+          name: mutation-report
+          path: Frontend/reports/mutation/mutation.html
+
+

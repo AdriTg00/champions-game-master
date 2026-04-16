@@ -1,0 +1,235 @@
+/* ====== FONDO FLOTANTE CON ICONOS GAMING ====== */
+
+.floating-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.floating-item {
+  position: absolute;
+  opacity: 0.15;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* MANDOS DE PLAYSTATION */
+.controller {
+  font-size: 60px;
+  filter: drop-shadow(0 0 10px #ff00e6);
+}
+
+.controller-1 {
+  top: 10%;
+  left: 5%;
+  animation: float1 20s infinite;
+}
+
+.controller-2 {
+  top: 60%;
+  right: 10%;
+  animation: float2 25s infinite;
+}
+
+.controller-3 {
+  top: 80%;
+  left: 15%;
+  animation: float3 22s infinite;
+}
+
+/* CAJAS DE JUEGOS */
+.game-box {
+  width: 80px;
+  height: 100px;
+  background: linear-gradient(135deg, #ff00e6 0%, #00c8ff 100%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(255, 0, 230, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  padding: 5px;
+}
+
+.box-1 {
+  top: 20%;
+  right: 15%;
+  animation: float4 18s infinite;
+}
+
+.box-2 {
+  top: 45%;
+  left: 8%;
+  animation: float5 23s infinite;
+}
+
+.box-3 {
+  top: 70%;
+  right: 20%;
+  animation: float6 20s infinite;
+}
+
+/* DISCOS / CDs */
+.disc {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #ff00e6,
+    #00c8ff,
+    #ff00e6,
+    #00c8ff,
+    #ff00e6
+  );
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+  position: relative;
+}
+
+.disc::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: #000;
+  border-radius: 50%;
+}
+
+.disc-1 {
+  top: 15%;
+  left: 25%;
+  animation: float7 16s infinite, spin 10s linear infinite;
+}
+
+.disc-2 {
+  top: 55%;
+  right: 5%;
+  animation: float8 19s infinite, spin 12s linear infinite;
+}
+
+/* CARTUCHOS RETRO */
+.cartridge {
+  width: 60px;
+  height: 90px;
+  background: linear-gradient(180deg, #9900ff 0%, #ff00e6 100%);
+  border-radius: 6px 6px 2px 2px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px rgba(153, 0, 255, 0.6);
+  position: relative;
+}
+
+.cartridge::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+}
+
+.cart-1 {
+  top: 35%;
+  left: 40%;
+  animation: float9 21s infinite;
+}
+
+.cart-2 {
+  top: 75%;
+  right: 35%;
+  animation: float10 24s infinite;
+}
+
+/* ANIMACIONES DE FLOTACIÓN */
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(30px, -40px) rotate(5deg); }
+  50% { transform: translate(-20px, -80px) rotate(-3deg); }
+  75% { transform: translate(40px, -50px) rotate(7deg); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-40px, 30px) rotate(-8deg); }
+  66% { transform: translate(25px, -20px) rotate(6deg); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  30% { transform: translate(50px, 25px) rotate(10deg); }
+  60% { transform: translate(-30px, -15px) rotate(-5deg); }
+}
+
+@keyframes float4 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-35px, 45px) rotate(-10deg); }
+  50% { transform: translate(20px, -30px) rotate(8deg); }
+  75% { transform: translate(-45px, 20px) rotate(-6deg); }
+}
+
+@keyframes float5 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  40% { transform: translate(40px, -35px) rotate(12deg); }
+  80% { transform: translate(-25px, 40px) rotate(-9deg); }
+}
+
+@keyframes float6 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  35% { transform: translate(-50px, -25px) rotate(-7deg); }
+  70% { transform: translate(35px, 30px) rotate(11deg); }
+}
+
+@keyframes float7 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-60px, 50px); }
+}
+
+@keyframes float8 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(45px, -55px); }
+}
+
+@keyframes float9 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(55px, 20px) rotate(15deg); }
+  66% { transform: translate(-40px, -30px) rotate(-12deg); }
+}
+
+@keyframes float10 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-35px, 40px) rotate(8deg); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive - Ocultar en móviles para mejor rendimiento */
+@media (max-width: 768px) {
+  .floating-item {
+    opacity: 0.08;
+  }
+  
+  .controller,
+  .game-box,
+  .disc,
+  .cartridge {
+    transform: scale(0.7);
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "1",
+    "name": "Fortnite",
+    "image": "https://via.placeholder.com/150",
+    "genres": ["Action"]
+  },
+  {
+    "_id": "2",
+    "name": "Rocket League",
+    "image": "https://via.placeholder.com/150",
+    "genres": ["Sports"]
+  }
+]

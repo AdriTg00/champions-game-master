@@ -1,0 +1,45 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:mocha": "mocha --require @babel/register --require test/setup.js \"src/__tests__/**/*.mocha.js\"",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "cypress": "^15.9.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.6",
+    "@babel/preset-env": "^7.28.6",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/register": "^7.28.6",
+    "@eslint/js": "^9.39.1",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "babel-jest": "^30.2.0",
+    "chai": "^6.2.2",
+    "cypress": "^15.9.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "jsdom": "^27.4.0",
+    "mocha": "^11.7.5",
+    "prettier": "^3.8.1",
+    "sinon": "^21.0.1",
+    "vite": "^7.2.4"
+  }
+}
