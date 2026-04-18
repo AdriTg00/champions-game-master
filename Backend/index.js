@@ -9,47 +9,37 @@ import gameRoutes from './routes/game.routes.js';
 dotenv.config();
 
 const app = express();
-
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://adriantarancon.dev',
-  'https://www.adriantarancon.dev',
-  'https://champions-game-master.vercel.app'
-];
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin: [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL,
+    "https://championsweb.adriantarancon.dev"
+  ].filter(Boolean),
   credentials: true
 }));
 
 app.use(express.json());
 
-let isConnected = false;
-
-app.use(async (req, res, next) => {
-  if (!isConnected) {
-    try {
-      await connectDB(process.env.MONGO_URI);
-      isConnected = true;
-    } catch (err) {
-      console.error('Error conectando con MongoDB:', err);
-      return res.status(500).json({ error: 'Error conectando con la base de datos' });
-    }
-  }
-  next();
-});
-
 // rutas
 app.get('/', (req, res) => {
   res.json({ message: 'Api funcionando correctamente' });
 });
-
 app.use('/api/users', userRoutes);
 app.use('/api/games', gameRoutes);
 
-export default app;
+const start = async () => {
+  try {
+    await connectDB(process.env.MONGO_URI);
+    app.listen(PORT, () => {
+      console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+      console.log(`📡 API disponible en http://localhost:${PORT}/api`);
+    });
+  } catch (err) {
+    console.error('Error arrancando server:', err);
+    process.exit(1);
+  }
+};
+
+start();

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import "./Register.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Register({ onRegister, goLogin }) {
   const [username, setUsername] = useState("");
-  const [gmail, setGmail] = useState(""); // email real
+  const [gmail, setGmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [error, setError] = useState("");
@@ -19,13 +21,13 @@ export default function Register({ onRegister, goLogin }) {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/api/users", {
+      const res = await fetch(`${API_URL}/api/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: username,
+          username,
           email: gmail,
-          password: password,
+          password,
         }),
       });
 
@@ -36,14 +38,11 @@ export default function Register({ onRegister, goLogin }) {
         return;
       }
 
-      // Usuario creado correctamente
       setSuccess("Usuario registrado correctamente");
 
-      // Volver al login tras 1 segundo
       setTimeout(() => {
         onRegister();
       }, 1000);
-
     } catch (err) {
       console.error("Error:", err);
       setError("No se pudo conectar con el servidor");
@@ -55,7 +54,6 @@ export default function Register({ onRegister, goLogin }) {
       <h2>Crear Cuenta</h2>
 
       <form onSubmit={handleSubmit}>
-
         <label>Nombre de usuario</label>
         <input
           value={username}
