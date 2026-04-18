@@ -10,25 +10,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://championsweb.adriantarancon.dev',
-  process.env.FRONTEND_URL
-].filter(Boolean);
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permite requests sin origin (Postman, health checks, etc.)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error(`CORS bloqueado para origin: ${origin}`));
-  },
-  credentials: true
+  origin: [
+    'http://localhost:5173',
+    'https://championsweb.adriantarancon.dev'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.options('*', cors());
 
 app.use(express.json());
 
