@@ -1,4 +1,3 @@
-// index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
@@ -9,23 +8,34 @@ import gameRoutes from './routes/game.routes.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://championsweb.adriantarancon.dev',
+  process.env.FRONTEND_URL
+].filter(Boolean);
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    process.env.FRONTEND_URL,
-    "https://championsweb.adriantarancon.dev"
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    // Permite requests sin origin (Postman, health checks, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS bloqueado para origin: ${origin}`));
+  },
   credentials: true
 }));
 
 app.use(express.json());
 
-// rutas
 app.get('/', (req, res) => {
   res.json({ message: 'Api funcionando correctamente' });
 });
+
 app.use('/api/users', userRoutes);
 app.use('/api/games', gameRoutes);
 
