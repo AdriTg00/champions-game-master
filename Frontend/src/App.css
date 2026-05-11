@@ -27,17 +27,16 @@ body {
 
 /* TÍTULO */
 .home h1 {
-  font-size: 32px;
+  font-size: clamp(24px, 5vw, 32px);
   letter-spacing: 3px;
   color: #ff00e6;
-
   animation: neonPulse 2.5s infinite;
-
   text-shadow:
     0 0 4px #ff00e6,
     0 0 10px #ff00e6,
     0 0 20px #ff33ee,
     0 0 40px #ff00e6;
+  padding: 0 20px;
 }
 
 /* Animación del título neon */
@@ -68,25 +67,24 @@ body {
 /* SUBTÍTULO */
 .home p {
   color: #a7a7ff;
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 12px);
   text-shadow: 0 0 4px #6a33ff;
   margin-bottom: 30px;
+  padding: 0 20px;
 }
 
 /* BOTÓN */
 .home button {
   padding: 14px 28px;
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   background-color: #240046;
   color: #ff00e6;
   border: 2px solid #ff00e6;
   border-radius: 8px;
   cursor: pointer;
-
   box-shadow:
     0 0 8px #ff00e6,
     0 0 16px #ff00e6 inset;
-
   transition: 0.2s ease;
   animation: buttonPulse 2s infinite ease-in-out;
 }
@@ -98,7 +96,6 @@ body {
   100% { transform: scale(1); box-shadow: 0 0 8px #ff00e6; }
 }
 
-/* Efecto Scanlines animado */
 .home::after {
   content: "";
   position: fixed;
@@ -107,20 +104,63 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
-
   background: repeating-linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.03) 0px,
     rgba(255, 255, 255, 0.03) 1px,
     transparent 3px
   );
-
   animation: scanMove 8s linear infinite;
 }
 
 @keyframes scanMove {
   0% { transform: translateY(0); }
   100% { transform: translateY(4px); }
+}
+
+@media (max-width: 768px) {
+  .cards {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .game-card {
+    height: 380px;
+  }
+
+  .game-card:hover {
+    transform: none;
+  }
+
+  .ranking-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .ranking-item img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .home {
+    padding: 0 15px;
+  }
+
+  .game-card {
+    height: 360px;
+  }
+
+  .game-image img {
+    height: 65%;
+  }
+
+  .ranking-list {
+    gap: 15px;
+  }
 }
 
 /* ======= GAME CHOOSER RETROFUTURISTA ======= */
@@ -130,27 +170,30 @@ body {
   flex-direction: column;
   align-items: center;
   margin-top: 40px;
+  padding: 0 20px;
   color: white;
   text-align: center;
 }
 
 .cards {
   display: flex;
+  flex-direction: row;
   gap: 40px;
   margin-top: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
 }
 
 .game-card {
-  width: 320px;
+  width: min(320px, 90vw);
   height: 420px;
   background: rgba(40, 0, 80, 0.35);
   border: 2px solid #ff00e6;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-
   animation: cardGlow 3.5s infinite ease-in-out;
-
   transition: 0.25s ease;
   box-shadow:
     0 0 10px #ff00e6,
@@ -174,6 +217,10 @@ body {
   transform: scale(1.05);
 }
 
+.game-card:active {
+  transform: scale(0.98);
+}
+
 .game-image img {
   width: 100%;
   height: 70%;
@@ -185,14 +232,14 @@ body {
 }
 
 .game-info h3 {
-  font-size: 18px;
+  font-size: clamp(16px, 3vw, 18px);
   margin: 0;
   color: #ff33ee;
   text-shadow: 0 0 4px #ff00e6;
 }
 
 .game-info p {
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 12px);
   color: #a7a7ff;
   margin-top: 6px;
 }
@@ -200,7 +247,7 @@ body {
 /* ======= RANKING RETROFUTURISTA ======= */
 
 .ranking {
-  padding-top: 40px;
+  padding: 40px 20px 20px;
   color: white;
   text-align: center;
 }
@@ -214,7 +261,7 @@ body {
 }
 
 .ranking-item {
-  width: 500px;
+  width: min(500px, 90vw);
   background: rgba(40, 0, 80, 0.35);
   border: 2px solid #ff00e6;
   padding: 12px;
@@ -227,19 +274,21 @@ body {
 }
 
 .ranking-item img {
-  width: 100px;
-  height: 130px;
+  width: clamp(80px, 20vw, 100px);
+  height: clamp(104px, 26vw, 130px);
   object-fit: cover;
   border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .ranking-item h3 {
   color: #ff33ee;
   margin: 0;
   text-shadow: 0 0 4px #ff00e6;
+  font-size: clamp(14px, 3vw, 18px);
 }
 
 .ranking-item p {
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 12px);
   color: #a7a7ff;
 }

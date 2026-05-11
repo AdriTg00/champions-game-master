@@ -1,15 +1,16 @@
 /* Ranking.css - Estilos para el ranking visual y podium */
 .ranking-root {
   color: #fff;
-  padding: 28px;
+  padding: clamp(15px, 3vw, 28px);
   max-width: 1200px;
   margin: 0 auto 80px;
   font-family: "Orbitron", sans-serif;
+  overflow-x: hidden;
 }
 
 .ranking-title {
   text-align: center;
-  font-size: 36px;
+  font-size: clamp(24px, 5vw, 36px);
   margin-bottom: 22px;
   letter-spacing: 1px;
 }
@@ -18,7 +19,7 @@
 .podium {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
+  gap: clamp(10px, 2vw, 20px);
   align-items: end;
   margin-bottom: 28px;
 }
@@ -43,13 +44,13 @@
 
 .podium-rank {
   font-weight: 700;
-  font-size: 18px;
+  font-size: clamp(14px, 3vw, 18px);
   color: #ffd166;
   margin-bottom: 8px;
 }
 
 .podium-image-wrap {
-  height: 160px;
+  height: clamp(120px, 20vw, 160px);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -71,12 +72,12 @@
 
 /* Name + count */
 .podium-name {
-  font-size: 18px;
+  font-size: clamp(14px, 3vw, 18px);
   margin-bottom: 6px;
 }
 .podium-count {
   color: rgba(255,255,255,0.75);
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
 }
 
 /* Lista resto */
@@ -88,8 +89,8 @@
   width: 100%;
 }
 .ranking-item {
-  width: 80%;           /* Puedes ajustar a 60%, 70%, 90%... */
-  max-width: 900px;     /* Fija un máximo muy bonito para centrar */
+  width: min(90%, 900px);
+  max-width: 900px;
 }
 .ranking-item-left {
   flex: 1 1 auto;
@@ -101,11 +102,11 @@
 
 
 .ranking-thumb {
-  width: 120px;
-  height: 72px;
+  width: clamp(80px, 15vw, 120px);
+  height: clamp(48px, 9vw, 72px);
   object-fit: cover;
   border-radius: 6px;
-  flex: 0 0 120px; /* evita que la imagen cambie el tamaño del contenedor */
+  flex: 0 0 auto;
   background: #111;
 }
 
@@ -114,30 +115,33 @@
   min-width: 0;
 }
 .ranking-name { 
-  font-size: 16px; 
+  font-size: clamp(14px, 2.5vw, 16px);
   margin-bottom: 6px; 
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* evita que el nombre rompa la fila */
+  text-overflow: ellipsis;
 }
-.ranking-count { color: rgba(255,255,255,0.8); font-size: 13px; }
+.ranking-count { 
+  color: rgba(255,255,255,0.8); 
+  font-size: clamp(11px, 2vw, 13px);
+}
 
 /* barra de progreso */
 .ranking-item-right {
-  flex: 0 0 220px;   /* ancho fijo para barra + % */
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 12px;
   justify-content: flex-end;
-  min-width: 220px;
+  min-width: 150px;
 }
 .progress-bar {
   flex: 1;
-  height: 12px;
+  height: clamp(10px, 2vw, 12px);
   background: rgba(255,255,255,0.06);
   border-radius: 999px;
   overflow: hidden;
-  min-width: 100px;
+  min-width: 80px;
 }
 .progress-bar-fill {
   height: 100%;
@@ -153,6 +157,7 @@
   color: #fff;
   min-width: 34px;
   text-align: right;
+  font-size: clamp(12px, 2.5vw, 14px);
 }
 
 /* Responsive: en pantallas pequeñas, apilar en columna */
@@ -189,8 +194,51 @@
   font-size: 15px;
 }
 
-/* responsive tweaks */
 @media (max-width: 900px) {
-  .podium { grid-template-columns: 1fr; gap: 10px; }
-  .podium-1 .podium-card { transform: none; }
+  .podium { 
+    grid-template-columns: 1fr; 
+    gap: 10px; 
+  }
+  
+  .podium-1 .podium-card,
+  .podium-2 .podium-card,
+  .podium-3 .podium-card { 
+    transform: none; 
+  }
+}
+
+@media (max-width: 600px) {
+  .ranking-item {
+    width: 95%;
+  }
+
+  .ranking-item-left {
+    gap: 10px;
+  }
+
+  .ranking-thumb {
+    width: 70px;
+    height: 42px;
+  }
+
+  .ranking-name {
+    font-size: 13px;
+  }
+
+  .ranking-count {
+    font-size: 11px;
+  }
+
+  .progress-bar {
+    min-width: 60px;
+  }
+
+  .ranking-item-right {
+    min-width: 100px;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 300px;
+  }
 }
