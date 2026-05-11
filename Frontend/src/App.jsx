@@ -1,8 +1,12 @@
-// src/App.jsx
-import { useEffect, useState } from "react";
-import Home from "./pages/Home";
-import GameChooser from "./pages/GameChooser";
-import Ranking from "./pages/Ranking";
+import { useEffect, useState, Suspense, lazy, useCallback } from "react";
+import { useAuthStore } from "./store/authStore";
+import { useGameStore } from "./store/gameStore";
+import ErrorBoundary from "./components/ErrorBoundary";
+const Home = lazy(() => import("./pages/Home"));
+const GameChooser = lazy(() => import("./pages/GameChooser"));
+const Ranking = lazy(() => import("./pages/Ranking"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
 
 import FloatingBackground from "./components/FloatingBackground";
 import StarsParallax from "./components/StarsParallax";
@@ -12,227 +16,241 @@ import "./components/FloatingBackground.css";
 import "./components/Podium3D.css";
 
 import { mockGames } from "./mock/games";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-
-// Fisher-Yates shuffle
-function shuffleArray(arr) {
+import client from "./api/client";
+const shuffleArray = (arr) => {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
+};
+
+
+const LoadingSpinner = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: '#1a1a2e',
+    color: '#00d4ff'
+  }}>
+    <p>Cargando...</p>
+  </div>
+);
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [authScreen, setAuthScreen] = useState("login");
+  const { user, token, setUser, logout } = useAuthStore();
+  const {
+    games,
+    champion,
+    left,
+    right,
+    choiceCount,
+    votesMap,
+    loading,
+    setGames,
+    setChampion,
+    setLeft,
+    setRight,
+    setChoiceCount,
+    recordVote,
+    setLoading,
+    reset
+  } = useGameStore();
 
+  const [authScreen, setAuthScreen] = useState("login");
+  const [screen, setScreen] = useState("home");
+  const [bufferIndex, setBufferIndex] = useState(0);
+
+    const MAX_CHOICES = 15;
   useEffect(() => {
     try {
       const stored = localStorage.getItem("currentUser");
-      if (stored) {
+      const storedToken = localStorage.getItem("authToken");
+      if (stored && storedToken) {
         const parsed = JSON.parse(stored);
         if (parsed) {
-          setUser(parsed);
+          setUser(parsed, storedToken);
           setAuthScreen("app");
         }
       }
-    } catch (e) { }
-  }, []);
+    } catch (e) {
+      console.warn("Error loading user from localStorage:", e);
+    }
+  }, [setUser]);
 
-  function handleLogin(userData) {
-    setUser(userData);
+    const handleLogin = useCallback((userData, authToken) => {
+    setUser(userData, authToken);
     localStorage.setItem("currentUser", JSON.stringify(userData));
+    localStorage.setItem("authToken", authToken);
     setAuthScreen("app");
-  }
-  function handleLogout() {
-    setUser(null);
+  }, [setUser]);
+
+  const handleLogout = useCallback(() => {
+    logout();
     localStorage.removeItem("currentUser");
+    localStorage.removeItem("authToken");
     setAuthScreen("login");
-  }
+    reset();
+  }, [logout, reset]);
 
-  // GAME STATE
-  const [games, setGames] = useState([]);
-  const [bufferIndex, setBufferIndex] = useState(0);
-
-  // champion = juego fijado arriba (null al inicio)
-  const [champion, setChampion] = useState(null);
-
-  // left/right en pantalla (si champion === null, left y right son las dos cartas iniciales)
-  const [left, setLeft] = useState(null);
-  const [right, setRight] = useState(null);
-
-  const [choiceCount, setChoiceCount] = useState(0);
-  const MAX_CHOICES = 15;
-  const [screen, setScreen] = useState("home");
-  const [loading, setLoading] = useState(false);
-  const [votesMap, setVotesMap] = useState({});
-
-  const BASE_API = `${import.meta.env.VITE_API_URL}/api/games`;
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    (async () => {
+
+    const loadGames = async () => {
       try {
-        const res = await fetch(BASE_API);
-        if (!res.ok) throw new Error("No list endpoint or bad response");
-        const data = await res.json();
+        const response = await client.get('/api/games');
+        const data = response.data;
         const list = Array.isArray(data) ? data : data.games ?? [];
-        if (mounted) setGames(list.length ? list : mockGames);
+        if (mounted) {
+          setGames(list.length ? list : mockGames);
+        }
       } catch (err) {
         console.warn("Fetch games failed, using mockGames:", err.message);
-        if (mounted) setGames(mockGames);
+        if (mounted) {
+          setGames(mockGames);
+        }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    })();
-    return () => { mounted = false; };
-  }, []);
+    };
 
-  function start() {
+    loadGames();
+    return () => { mounted = false; };
+  }, [setGames, setLoading]);
+
+    const start = useCallback(() => {
     const source = games && games.length ? games : mockGames;
     const shuffled = shuffleArray(source);
-    // no fijamos champion al iniciar
     setChampion(null);
-    // left/right = las dos primeras cartas
     setLeft(shuffled[0] ?? null);
     setRight(shuffled[1] ?? null);
     setGames(shuffled);
     setBufferIndex(2);
-    setVotesMap({});
     setChoiceCount(0);
     setScreen("game");
-  }
+  }, [games, setChampion, setLeft, setRight, setGames, setChoiceCount]);
 
-  async function markPickOnServer(gameId) {
-    if (!gameId) return;
+    const markPickOnServer = useCallback(async (gameId) => {
+    if (!gameId) return false;
     try {
-      const r = await fetch(`${BASE_API}/pick/${gameId}`, { method: "POST" });
-      if (r.ok) return true;
-      const r2 = await fetch(`${BASE_API}/${gameId}/select`, { method: "POST" });
-      return r2.ok;
+      await client.post(`/api/games/pick/${gameId}`);
+      return true;
     } catch (e) {
+      console.warn("Error marking pick on server:", e);
       return false;
     }
-  }
+  }, []);
 
-  function incrementVote(gameObj) {
-    setVotesMap(prev => {
-      const id = gameObj._id ?? gameObj.id ?? gameObj.externalId ?? gameObj.name;
-      const copy = { ...prev };
-      if (!copy[id]) copy[id] = { game: gameObj, count: 0 };
-      copy[id].count = (copy[id].count || 0) + 1;
-      return copy;
-    });
-  }
-
-  function getNextFromBuffer() {
+    const getNextFromBuffer = useCallback(() => {
     if (bufferIndex >= games.length) return null;
     const next = games[bufferIndex];
     setBufferIndex(idx => idx + 1);
     return next;
-  }
+  }, [bufferIndex, games]);
 
-  // nueva lógica chooseGame según si champion existe o no
-  // Reemplaza la función chooseGame actual por esta exacta en App.jsx
-  async function chooseGame(selected) {
+    const chooseGame = useCallback((selected) => {
     if (!selected) return;
-    // intento marcar en servidor (no bloquea la UI)
-    markPickOnServer(selected._id ?? selected.id).catch(() => { });
 
-    // Obtener siguiente del buffer de forma inmediata
-    const nextFromBuffer = getNextFromBuffer(); // esto también incrementa bufferIndex
+    markPickOnServer(selected._id ?? selected.id).catch(() => {});
+    const nextFromBuffer = getNextFromBuffer();
 
-    // Caso 1: todavía no hay champion (primera elección)
     if (!champion) {
-      // promovemos el seleccionado a champion
       setChampion(selected);
-      incrementVote(selected);
-
-      // La derecha deberá ser el siguiente del buffer si existe,
-      // si no hay siguiente, usamos el "otro" que estaba en pantalla (si existe)
+      recordVote(selected._id ?? selected.id);
       const other = (left && (left._id ?? left.id) === (selected._id ?? selected.id)) ? right : left;
-      // Si nextFromBuffer existe, lo ponemos en right; si no, ponemos 'other' (posible null)
       setRight(nextFromBuffer ?? other ?? null);
-
-      // limpiamos left (ya no se usa cuando champion existe)
       setLeft(null);
-
     } else {
-      // Caso 2: ya hay champion
       const selectedId = selected._id ?? selected.id;
       const championId = champion._id ?? champion.id;
       const rightId = right ? (right._id ?? right.id) : null;
 
       if (selectedId === championId) {
-        // reafirmar champion: incrementamos y reemplazamos right por nextFromBuffer
-        incrementVote(champion);
+        recordVote(championId);
         setRight(nextFromBuffer ?? null);
-
       } else if (selectedId === rightId) {
-        // el opponent gana: lo promovemos a champion
-        incrementVote(selected);
+        recordVote(selectedId);
         setChampion(selected);
-        // ponemos como right el siguiente del buffer (o null si no hay)
         setRight(nextFromBuffer ?? null);
       } else {
-        // caso raro: selecciona un juego que no es ni champion ni right
-        incrementVote(selected);
+        recordVote(selectedId);
         setChampion(selected);
         setRight(nextFromBuffer ?? null);
       }
     }
 
-    // contador y límite
-    setChoiceCount(prev => {
-      const newCount = prev + 1;
-      if (newCount >= MAX_CHOICES) {
-        setScreen("ranking");
-      }
-      return newCount;
-    });
-  }
+    const newCount = choiceCount + 1;
+    setChoiceCount(newCount);
+    if (newCount >= MAX_CHOICES) {
+      setScreen("ranking");
+    }
+  }, [champion, left, right, choiceCount, recordVote, markPickOnServer, getNextFromBuffer, setChampion, setRight, setLeft, setChoiceCount]);
 
 
-  function restart() {
+    const restart = useCallback(() => {
     const source = games && games.length ? games : mockGames;
     const shuffled = shuffleArray(source);
     setGames(shuffled);
-    setChampion(null);
-    setLeft(shuffled[0] ?? null);
-    setRight(shuffled[1] ?? null);
+    reset();
     setBufferIndex(2);
-    setVotesMap({});
-    setChoiceCount(0);
     setScreen("home");
-  }
+  }, [games, setGames, reset]);
 
-  function getRankingArray() {
-    const arr = Object.values(votesMap).map(v => ({ ...v.game, count: v.count }));
+  const getRankingArray = useCallback(() => {
+    const arr = Object.entries(votesMap)
+      .map(([gameId, voteCount]) => {
+        const game = games.find(g => (g._id ?? g.id) === gameId);
+        return game ? { ...game, count: voteCount } : null;
+      })
+      .filter(Boolean);
     arr.sort((a, b) => (b.count || 0) - (a.count || 0));
     return arr;
+  }, [votesMap, games]);
+
+  if (loading) {
+    return (
+      <ErrorBoundary>
+        <LoadingSpinner />
+      </ErrorBoundary>
+    );
   }
 
-  if (loading) return <div style={{ color: "#fff" }}>Cargando juegos...</div>;
-
-  return (
-    <>
+    return (
+    <ErrorBoundary>
       <StarsParallax />
       <FloatingBackground />
 
       {authScreen !== "app" && (
         <div className="auth-root">
-          {authScreen === "login" && <Login onLogin={handleLogin} goRegister={() => setAuthScreen("register")} />}
-          {authScreen === "register" && <Register onRegister={() => setAuthScreen("login")} goLogin={() => setAuthScreen("login")} />}
+          <Suspense fallback={<LoadingSpinner />}>
+            {authScreen === "login" && (
+              <Login
+                onLogin={handleLogin}
+                goRegister={() => setAuthScreen("register")}
+              />
+            )}
+            {authScreen === "register" && (
+              <Register
+                onRegister={() => setAuthScreen("login")}
+                goLogin={() => setAuthScreen("login")}
+              />
+            )}
+          </Suspense>
         </div>
       )}
 
       {authScreen === "app" && (
-        <>
-          {screen === "home" && <Home onStart={start} />}
+        <Suspense fallback={<LoadingSpinner />}>
+          {screen === "home" && (
+            <Home onStart={start} />
+          )}
 
           {screen === "game" && (
             <>
@@ -241,7 +259,6 @@ export default function App() {
               </div>
 
               <GameChooser
-                // pasamos champion/opponent si existen; si champion es null, GameChooser usará left/right fallback
                 champion={champion}
                 opponent={right}
                 left={left}
@@ -251,9 +268,14 @@ export default function App() {
             </>
           )}
 
-          {screen === "ranking" && <Ranking ranking={getRankingArray()} onRestart={restart} />}
-        </>
+          {screen === "ranking" && (
+            <Ranking
+              ranking={getRankingArray()}
+              onRestart={restart}
+            />
+          )}
+        </Suspense>
       )}
-    </>
+    </ErrorBoundary>
   );
 }

@@ -1,98 +1,94 @@
 import UserDAO from "../repo/userDAO.js";
 import bcrypt from "bcrypt";
 import User from '../models/User.js';
+import { generateToken } from '../middleware/auth.js';
+import logger from '../utils/logger.js';
 
 const userDAO = new UserDAO();
 
-// -----------------------------------------------------------
-// CREAR USUARIO
-// -----------------------------------------------------------
 export const createUser = async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
         if (!username || !email || !password) {
+            logger.warn('Intento de crear usuario sin datos desde', req.ip);
             return res.status(400).json({ error: "Faltan datos" });
         }
 
-        if (password.length < 6) {
-            return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
-        }
-
-        if (!email.includes("@")) {
-            return res.status(400).json({ error: "El email debe contener @" });
-        }
-
-        if (!username.trim().length || !email.trim().length || !password.trim().length) {
-            return res.status(400).json({ error: "Todos los campos deben tener contenido" });
-        }
-
-        const existingUsername = await userDAO.findByUsername(username);
+                const existingUsername = await userDAO.findByUsername(username);
         if (existingUsername) {
+            logger.warn(`Intento de crear usuario con username duplicado: ${username}`);
             return res.status(400).json({ error: "El username ya existe" });
         }
 
         const existingEmail = await userDAO.findByEmail(email);
         if (existingEmail) {
+            logger.warn(`Intento de crear usuario con email duplicado: ${email}`);
             return res.status(400).json({ error: "El email ya existe" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await userDAO.create({
+                const user = await userDAO.create({
             username,
             email,
             password: hashedPassword
         });
 
+        logger.audit(user._id, 'CREATE', 'User', { username, email });
+        logger.info(`Usuario creado: ${username}`);
+
+        const token = generateToken(user);
+
         res.status(201).json({
             message: "Usuario creado correctamente",
-            user
+            token,
+            user: user.toJSON()
         });
 
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+        } catch (error) {
+        logger.error('Error en createUser:', error.message);
+        res.status(500).json({ error: "Error al crear usuario" });
+        }
 };
 
-// -----------------------------------------------------------
-// LOGIN DE USUARIO
-// -----------------------------------------------------------
 export const loginUser = async (req, res) => {
     try {
         const { username, password } = req.body;
 
         if (!username || !password) {
+            logger.warn(`Login sin datos desde ${req.ip}`);
             return res.status(400).json({ error: "Faltan datos" });
         }
 
-        // Buscar usuario por username
         const user = await userDAO.findByUsername(username);
         if (!user) {
-            return res.status(400).json({ error: "Usuario no encontrado" });
+                        logger.warn(`Intento de login con usuario inexistente: ${username}`);
+            return res.status(401).json({ error: "Credenciales inválidas" });
         }
 
-        // Comparar contraseñas
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ error: "Contraseña incorrecta" });
+                        logger.warn(`Intento de login con contraseña incorrecta para: ${username}`);
+            return res.status(401).json({ error: "Credenciales inválidas" });
         }
 
-        // Login exitoso
+        const token = generateToken(user);
+        logger.audit(user._id, 'LOGIN', 'User', { username, ip: req.ip });
+        logger.info(`Login exitoso: ${username}`);
+
         return res.status(200).json({
             message: "Login correcto",
+            token,
             user: user.toJSON()
         });
 
-    } catch (error) {
-        console.error("Error en login:", error);
+        } catch (error) {
+        logger.error("Error en login:", error.message);
         return res.status(500).json({ error: "Error en el servidor" });
-    }
+        }
 };
 
-// -----------------------------------------------------------
-// OBTENER TODOS LOS USUARIOS
-// -----------------------------------------------------------
 export const getAllUsers = async (req, res) => {
     try {
         const users = await userDAO.findAll();
@@ -100,12 +96,9 @@ export const getAllUsers = async (req, res) => {
     } catch (error) {
         console.error("Error al obtener usuarios:", error);
         res.status(500).json({ error: error.message });
-    }
+        }
 };
 
-// -----------------------------------------------------------
-// OBTENER USUARIO POR ID
-// -----------------------------------------------------------
 export const getUserById = async (req, res) => {
     try {
         const userId = req.params.id ?? req.params.userId;
@@ -119,12 +112,9 @@ export const getUserById = async (req, res) => {
     } catch (err) {
         console.error("Error al obtener usuario:", err);
         return res.status(500).json({ error: "Server error" });
-    }
+        }
 };
 
-// -----------------------------------------------------------
-// ACTUALIZAR USUARIO
-// -----------------------------------------------------------
 export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -148,12 +138,9 @@ export const updateUser = async (req, res) => {
     } catch (error) {
         console.error("Error al actualizar usuario:", error);
         res.status(500).json({ error: error.message });
-    }
+        }
 };
 
-// -----------------------------------------------------------
-// ELIMINAR USUARIO
-// -----------------------------------------------------------
 export const deleteUser = async (req, res) => {
     try {
         const user = await userDAO.delete(req.params.id);

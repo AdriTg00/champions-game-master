@@ -1,4 +1,3 @@
-// routes/user.routes.js
 import express from 'express';
 import {
   createUser,
@@ -6,27 +5,23 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-  loginUser                 // ← IMPORTACIÓN AÑADIDA
+  loginUser
 } from '../controllers/user.controller.js';
+import { verifyToken } from '../middleware/auth.js';
+import {
+  validateUserCreation,
+  validateUserLogin,
+  validateObjectId
+} from '../middleware/validation.js';
+import { loginLimiter, createUserLimiter } from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
-// POST /api/users - Crear usuario
-router.post('/', createUser);
-
-// POST /api/users/login - Iniciar sesión
-router.post('/login', loginUser);   // ← NUEVA RUTA
-
-// GET /api/users - Obtener todos los usuarios
-router.get('/', getAllUsers);
-
-// GET /api/users/:id - Obtener usuario por ID
-router.get('/:id', getUserById);
-
-// PUT /api/users/:id - Actualizar usuario
-router.put('/:id', updateUser);
-
-// DELETE /api/users/:id - Eliminar usuario
-router.delete('/:id', deleteUser);
+router.post('/', createUserLimiter, validateUserCreation, createUser);
+router.post('/login', loginLimiter, validateUserLogin, loginUser);
+router.get('/', verifyToken, getAllUsers);
+router.get('/:id', verifyToken, validateObjectId, getUserById);
+router.put('/:id', verifyToken, validateObjectId, updateUser);
+router.delete('/:id', verifyToken, validateObjectId, deleteUser);
 
 export default router;

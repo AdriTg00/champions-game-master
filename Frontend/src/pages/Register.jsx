@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "./Register.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import client from "../api/client";
 
 export default function Register({ onRegister, goLogin }) {
   const [username, setUsername] = useState("");
@@ -10,42 +9,68 @@ export default function Register({ onRegister, goLogin }) {
   const [confirmar, setConfirmar] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
+      async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     if (password !== confirmar) {
-      return setError("Las contraseñas no coinciden");
+      setError("Las contraseñas no coinciden");
+      setLoading(false);
+      return;
     }
 
-    try {
-      const res = await fetch(`${API_URL}/api/users`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          email: gmail,
-          password,
-        }),
+    if (password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres");
+      setLoading(false);
+      return;
+    }
+
+        try {
+      const response = await client.post('/api/users', {
+        username: username.trim(),
+        email: gmail.trim(),
+        password
       });
 
-      const data = await res.json();
+      const { token, user } = response.data;
 
-      if (!res.ok) {
-        setError(data.error || "No se pudo crear el usuario");
+      if (!token) {
+        setError("Error: No se recibió token de autenticación");
+        setLoading(false);
         return;
       }
 
-      setSuccess("Usuario registrado correctamente");
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      localStorage.setItem("authToken", token);
+      
+      setSuccess("Usuario registrado correctamente. Redirigiendo...");
 
       setTimeout(() => {
         onRegister();
       }, 1000);
     } catch (err) {
-      console.error("Error:", err);
-      setError("No se pudo conectar con el servidor");
+      console.error('Register error:', err);
+      
+      if (err.response?.status === 429) {
+        setError("Demasiados registros. Por favor intenta más tarde");
+            } else if (err.response?.status === 400) {
+        const details = err.response.data?.details;
+        if (details && details.length > 0) {
+          setError(details[0].message);
+        } else {
+          setError(err.response.data?.error || "No se pudo crear el usuario");
+        }
+      } else if (err.code === 'ERR_NETWORK') {
+        setError("No se pudo conectar con el servidor");
+      } else {
+        setError(err.response?.data?.error || "Error al crear usuario");
+      }
+      
+      setLoading(false);
     }
   }
 
@@ -53,27 +78,37 @@ export default function Register({ onRegister, goLogin }) {
     <div className="auth-card">
       <h2>Crear Cuenta</h2>
 
-      <form onSubmit={handleSubmit}>
-        <label>Nombre de usuario</label>
+            <form onSubmit={handleSubmit}>
+        <label>Nombre de usuario (3-50 caracteres, alfanumérico)</label>
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          placeholder="Tu usuario único..."
+          disabled={loading}
           required
+          autoComplete="username"
         />
 
         <label>Email</label>
         <input
+          type="email"
           value={gmail}
           onChange={(e) => setGmail(e.target.value)}
+          placeholder="tu@email.com"
+          disabled={loading}
           required
+          autoComplete="email"
         />
 
-        <label>Contraseña</label>
+        <label>Contraseña (mín. 8 caracteres, con mayúsculas, minúsculas y números)</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          disabled={loading}
           required
+          autoComplete="new-password"
         />
 
         <label>Confirmar contraseña</label>
@@ -81,15 +116,20 @@ export default function Register({ onRegister, goLogin }) {
           type="password"
           value={confirmar}
           onChange={(e) => setConfirmar(e.target.value)}
+          placeholder="••••••••"
+          disabled={loading}
           required
+          autoComplete="new-password"
         />
 
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
 
-        <button type="submit">Registrarme</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Registrando...' : 'Registrarme'}
+        </button>
 
-        <button type="button" onClick={goLogin}>
+        <button type="button" onClick={goLogin} disabled={loading} style={{ marginTop: '10px' }}>
           Ya tengo cuenta
         </button>
       </form>
