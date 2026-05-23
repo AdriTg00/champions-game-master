@@ -21,7 +21,7 @@ describe('Integración GameChooser - Lógica de selección', () => {
     cy.contains('Comenzar', { timeout: 10000 }).click()
 
     // Comprobamos contador inicial
-    cy.contains('Elección 0 / 15', { timeout: 10000 }).should('be.visible')
+    cy.contains('Elección 0 / 25', { timeout: 10000 }).should('be.visible')
 
     // Click en una carta
     cy.get('.cards', { timeout: 10000 })
@@ -30,6 +30,6 @@ describe('Integración GameChooser - Lógica de selección', () => {
       .click()
 
     // El contador debe incrementarse
-    cy.contains('Elección 1 / 15', { timeout: 10000 }).should('be.visible')
+    cy.contains('Elección 1 / 25', { timeout: 10000 }).should('be.visible')
   })
 })

@@ -32,7 +32,7 @@ describe('E2E - Ranking final', () => {
       .click()
 
     // 5️⃣ Realizamos elecciones hasta llegar al ranking
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 25; i++) {
       cy.contains('button', 'Elegir', { timeout: 20000 })
         .first()
         .click()

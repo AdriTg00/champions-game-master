@@ -129,7 +129,7 @@
 - [ ] El juego seleccionado sube a "campeón"
 - [ ] Aparece nuevo contrincante
 - [ ] Contador de elecciones incrementa
-- [ ] Después de 15 elecciones → va a ranking
+ - [ ] Después de 25 elecciones → va a ranking
 
 ### 5. Ranking
 - [ ] Pantalla de ranking aparece

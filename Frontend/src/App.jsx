@@ -49,6 +49,7 @@ export default function App() {
     right,
     choiceCount,
     votesMap,
+    MAX_CHOICES,
     loading,
     setGames,
     setChampion,
@@ -64,7 +65,6 @@ export default function App() {
   const [screen, setScreen] = useState("home");
   const [bufferIndex, setBufferIndex] = useState(0);
 
-    const MAX_CHOICES = 15;
   useEffect(() => {
     try {
       const stored = localStorage.getItem("currentUser");
@@ -103,9 +103,26 @@ export default function App() {
 
     const loadGames = async () => {
       try {
-        const response = await client.get('/api/games');
-        const data = response.data;
-        const list = Array.isArray(data) ? data : data.games ?? [];
+        // Intentamos cargar de tu backend
+        let response = await client.get('/api/games');
+        let list = Array.isArray(response.data) ? response.data : response.data.games ?? [];
+
+        // SI EL BACKEND ESTÁ VACÍO O TIENE POCOS JUEGOS:
+        // Consultamos juegos populares de la API de RAWG
+        if (list.length < 10) {
+          const RAWG_KEY = "0be9054b1c494cb9b21c8d64e941966c"; 
+          const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=85,100&ordering=-added&page_size=50`);
+          const rawgData = await rawgRes.json();
+          
+          // Mapeamos el formato de RAWG al formato de tu app
+          list = rawgData.results.map(g => ({
+            id: g.id.toString(),
+            name: g.name,
+            image: g.background_image,
+            genres: g.genres.map(genre => genre.name)
+          }));
+        }
+
         if (mounted) {
           setGames(list.length ? list : mockGames);
         }
@@ -163,7 +180,6 @@ export default function App() {
 
     if (!champion) {
       setChampion(selected);
-      recordVote(selected._id ?? selected.id);
       const other = (left && (left._id ?? left.id) === (selected._id ?? selected.id)) ? right : left;
       setRight(nextFromBuffer ?? other ?? null);
       setLeft(null);
@@ -173,22 +189,20 @@ export default function App() {
       const rightId = right ? (right._id ?? right.id) : null;
 
       if (selectedId === championId) {
-        recordVote(championId);
         setRight(nextFromBuffer ?? null);
       } else if (selectedId === rightId) {
-        recordVote(selectedId);
         setChampion(selected);
         setRight(nextFromBuffer ?? null);
       } else {
-        recordVote(selectedId);
         setChampion(selected);
         setRight(nextFromBuffer ?? null);
       }
     }
 
-    const newCount = choiceCount + 1;
-    setChoiceCount(newCount);
-    if (newCount >= MAX_CHOICES) {
+    // Usamos el método recordVote del store que ya maneja el incremento y el flag isFinished
+    recordVote(selected._id ?? selected.id);
+
+    if (choiceCount + 1 >= MAX_CHOICES) {
       setScreen("ranking");
     }
   }, [champion, left, right, choiceCount, recordVote, markPickOnServer, getNextFromBuffer, setChampion, setRight, setLeft, setChoiceCount]);

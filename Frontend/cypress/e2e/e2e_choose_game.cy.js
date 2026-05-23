@@ -31,7 +31,7 @@ describe('E2E - Selección de videojuego', () => {
       .click()
 
     // 5️⃣ Contador inicial
-    cy.contains('Elección 0 / 15', { timeout: 20000 })
+    cy.contains('Elección 0 / 25', { timeout: 20000 })
       .should('be.visible')
 
     // 6️⃣ Elegimos un juego (botón real)
@@ -40,7 +40,7 @@ describe('E2E - Selección de videojuego', () => {
       .click()
 
     // 7️⃣ El contador aumenta
-    cy.contains('Elección 1 / 15', { timeout: 20000 })
+    cy.contains('Elección 1 / 25', { timeout: 20000 })
       .should('be.visible')
   })
 })

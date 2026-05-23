@@ -21,7 +21,7 @@ describe('Integración flujo completo - Ranking final', () => {
     cy.contains('Comenzar', { timeout: 10000 }).click()
 
     // Realizamos elecciones hasta llegar al ranking
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 25; i++) {
       cy.get('.cards', { timeout: 10000 })
         .find('div')
         .first()

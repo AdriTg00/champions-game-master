@@ -3,11 +3,14 @@ import { create } from 'zustand';
 
 export const useGameStore = create((set, get) => ({
   // Estado de juegos
+  MAX_CHOICES: 25, // Definimos el número máximo de elecciones aquí
+  
   games: [],
   champion: null,
   left: null,
   right: null,
   bufferIndex: 0,
+  isFinished: false,
   
   // Estado de votación
   choiceCount: 0,
@@ -37,8 +40,14 @@ export const useGameStore = create((set, get) => ({
   // Registrar voto
   recordVote: (gameId) => set((state) => {
     const newVotesMap = { ...state.votesMap };
+    const newChoiceCount = state.choiceCount + 1;
+    const isFinished = newChoiceCount >= state.MAX_CHOICES;
     newVotesMap[gameId] = (newVotesMap[gameId] || 0) + 1;
-    return { votesMap: newVotesMap };
+    return {
+      votesMap: newVotesMap,
+      choiceCount: newChoiceCount,
+      isFinished
+    };
   }),
   
   // Reset completo
@@ -47,6 +56,7 @@ export const useGameStore = create((set, get) => ({
     left: null,
     right: null,
     bufferIndex: 0,
+    isFinished: false,
     choiceCount: 0,
     votesMap: {},
     error: null
