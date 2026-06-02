@@ -26,6 +26,7 @@ const shuffleArray = (arr) => {
   return a;
 };
 
+const MAX_RANDOM_GAMES = 200;
 
 const LoadingSpinner = () => (
   <div style={{
@@ -110,12 +111,23 @@ export default function App() {
         // SI EL BACKEND ESTÁ VACÍO O TIENE POCOS JUEGOS:
         // Consultamos juegos populares de la API de RAWG
         if (list.length < 10) {
-          const RAWG_KEY = "0be9054b1c494cb9b21c8d64e941966c"; 
-          const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=85,100&ordering=-added&page_size=100`);
-          const rawgData = await rawgRes.json();
-          
+          const RAWG_KEY = "0be9054b1c494cb9b21c8d64e941966c";
+          const RAWG_PAGE_SIZE = 100;
+          const RAWG_MAX_GAMES = MAX_RANDOM_GAMES;
+          const rawgUrlBase = `https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=85,100&ordering=-added&page_size=${RAWG_PAGE_SIZE}`;
+
+          const rawgResponses = await Promise.all([
+            fetch(`${rawgUrlBase}&page=1`),
+            fetch(`${rawgUrlBase}&page=2`)
+          ]);
+
+          const rawgData = await Promise.all(rawgResponses.map(res => res.json()));
+          const rawgResults = rawgData
+            .flatMap(data => Array.isArray(data.results) ? data.results : [])
+            .slice(0, RAWG_MAX_GAMES);
+
           // Mapeamos el formato de RAWG al formato de tu app
-          list = rawgData.results.map(g => ({
+          list = rawgResults.map(g => ({
             id: g.id.toString(),
             name: g.name,
             image: g.background_image,
@@ -145,10 +157,11 @@ export default function App() {
     const start = useCallback(() => {
     const source = games && games.length ? games : mockGames;
     const shuffled = shuffleArray(source);
+    const selectedGames = shuffled.slice(0, Math.min(shuffled.length, MAX_RANDOM_GAMES));
     setChampion(null);
-    setLeft(shuffled[0] ?? null);
-    setRight(shuffled[1] ?? null);
-    setGames(shuffled);
+    setLeft(selectedGames[0] ?? null);
+    setRight(selectedGames[1] ?? null);
+    setGames(selectedGames);
     setBufferIndex(2);
     setChoiceCount(0);
     setScreen("game");
@@ -211,7 +224,8 @@ export default function App() {
     const restart = useCallback(() => {
     const source = games && games.length ? games : mockGames;
     const shuffled = shuffleArray(source);
-    setGames(shuffled);
+    const selectedGames = shuffled.slice(0, Math.min(shuffled.length, MAX_RANDOM_GAMES));
+    setGames(selectedGames);
     reset();
     setBufferIndex(2);
     setScreen("home");
