@@ -111,7 +111,7 @@ export default function App() {
         // Consultamos juegos populares de la API de RAWG
         if (list.length < 10) {
           const RAWG_KEY = "0be9054b1c494cb9b21c8d64e941966c"; 
-          const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=85,100&ordering=-added&page_size=50`);
+          const rawgRes = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=85,100&ordering=-added&page_size=100`);
           const rawgData = await rawgRes.json();
           
           // Mapeamos el formato de RAWG al formato de tu app
