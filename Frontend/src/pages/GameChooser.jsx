@@ -12,9 +12,9 @@ export default function GameChooser({ champion, opponent, left, right, chooseGam
     if (!left || !right) return <h2 style={{ color: "#fff", textAlign: "center" }}>Preparando oponentes...</h2>;
 
     return (
-      <div className="chooser scanlines" style={{ padding: "0 24px" }}>
-        <h2 style={{ color: "#fff", textAlign: "center" }}>¿Cuál prefieres?</h2>
-        <div className="cards" style={{ display: "flex", justifyContent: "center", gap: 40, marginTop: 20 }}>
+      <div className="chooser scanlines">
+        <h2>¿Cuál prefieres?</h2>
+        <div className="cards">
           <GameCard game={left} onSelect={() => chooseGame && chooseGame(left)} />
           <GameCard game={right} onSelect={() => chooseGame && chooseGame(right)} />
         </div>
@@ -24,22 +24,21 @@ export default function GameChooser({ champion, opponent, left, right, chooseGam
 
   // champion existe: lo mostramos arriba y el opponent a la derecha
   return (
-    <div className="chooser scanlines" style={{ padding: "0 24px" }}>
+    <div className="chooser scanlines">
       {champion && (
-        <div className="selected-game" style={{ textAlign: "center", marginBottom: 20 }}>
+        <div className="selected-game">
           <img
             src={(champion.image ?? champion.coverUrl ?? champion.thumbnail) || ""}
             alt={champion.title ?? champion.name}
-            style={{ width: 300, height: "auto", display: "block", margin: "0 auto 8px" }}
             onError={(e) => { e.target.style.display = "none"; }}
           />
-          <h3 style={{ color: "#fff" }}>{champion.title ?? champion.name}</h3>
+          <h3>{champion.title ?? champion.name}</h3>
         </div>
       )}
 
-      <h2 style={{ color: "#fff", textAlign: "center" }}>¿Cuál prefieres?</h2>
+      <h2>¿Cuál prefieres?</h2>
 
-      <div className="cards" style={{ display: "flex", justifyContent: "center", gap: 40, marginTop: 20 }}>
+      <div className="cards">
         <GameCard game={champion} onSelect={() => chooseGame && chooseGame(champion)} />
         <GameCard game={opponent} onSelect={() => chooseGame && chooseGame(opponent)} />
       </div>

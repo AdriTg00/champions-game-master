@@ -252,10 +252,12 @@ export default function App() {
 
     return (
     <ErrorBoundary>
-      <StarsParallax />
-      <FloatingBackground />
+      <div className="app-shell">
+        <div className="app-frame">
+          <StarsParallax />
+          <FloatingBackground />
 
-      {authScreen !== "app" && (
+          {authScreen !== "app" && (
         <div className="auth-root">
           <Suspense fallback={<LoadingSpinner />}>
             {authScreen === "login" && (
@@ -282,8 +284,11 @@ export default function App() {
 
           {screen === "game" && (
             <>
-              <div style={{ textAlign: "center", color: "#fff", marginTop: 8 }}>
-                Elección {choiceCount} / {MAX_CHOICES}
+              <div className="screen-header">
+                <div>
+                  <div className="screen-title">Elección {choiceCount} de {MAX_CHOICES}</div>
+                  <p className="screen-subtitle">Selecciona tu favorito y construye tu ranking personalizado.</p>
+                </div>
               </div>
 
               <GameChooser
@@ -304,6 +309,8 @@ export default function App() {
           )}
         </Suspense>
       )}
+        </div>
+      </div>
     </ErrorBoundary>
   );
 }
