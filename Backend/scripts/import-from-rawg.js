@@ -7,8 +7,8 @@ import mongoose from 'mongoose';
 
 const RAWG_KEY = "0be9054b1c494cb9b21c8d64e941966c";
 const RAWG_PAGE_SIZE = 100;
-const RAWG_TOTAL_PAGES = 10;
-const RAWG_URL = (page) => `https://api.rawg.io/api/games?key=${RAWG_KEY}&ordering=-rating&page_size=${RAWG_PAGE_SIZE}&page=${page}`;
+const RAWG_TOTAL_PAGES = 2;
+const RAWG_URL = (page) => `https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=75,100&ordering=-added&page_size=${RAWG_PAGE_SIZE}&page=${page}`;
 
 const run = async () => {
   try {
