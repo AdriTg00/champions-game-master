@@ -104,36 +104,11 @@ export default function App() {
 
     const loadGames = async () => {
       try {
-        // Intentamos cargar de tu backend
-        let response = await client.get('/api/games');
-        let list = Array.isArray(response.data) ? response.data : response.data.games ?? [];
-
-        // SI EL BACKEND ESTÁ VACÍO O TIENE POCOS JUEGOS:
-        // Consultamos juegos populares de la API de RAWG
-        if (list.length < 10) {
-          const RAWG_KEY = "0be9054b1c494cb9b21c8d64e941966c";
-          const RAWG_PAGE_SIZE = 100;
-          const RAWG_MAX_GAMES = MAX_RANDOM_GAMES;
-          const rawgUrlBase = `https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=85,100&ordering=-added&page_size=${RAWG_PAGE_SIZE}`;
-
-          const rawgResponses = await Promise.all([
-            fetch(`${rawgUrlBase}&page=1`),
-            fetch(`${rawgUrlBase}&page=2`)
-          ]);
-
-          const rawgData = await Promise.all(rawgResponses.map(res => res.json()));
-          const rawgResults = rawgData
-            .flatMap(data => Array.isArray(data.results) ? data.results : [])
-            .slice(0, RAWG_MAX_GAMES);
-
-          // Mapeamos el formato de RAWG al formato de tu app
-          list = rawgResults.map(g => ({
-            id: g.id.toString(),
-            name: g.name,
-            image: g.background_image,
-            genres: g.genres.map(genre => genre.name)
-          }));
-        }
+        // Cargamos los juegos desde MongoDB a través de la API /api/games
+        const response = await client.get('/api/games?limit=400');
+        const list = Array.isArray(response.data)
+          ? response.data
+          : response.data.games ?? [];
 
         if (mounted) {
           setGames(list.length ? list : mockGames);

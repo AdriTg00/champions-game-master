@@ -1,12 +1,14 @@
 // scripts/import-from-rawg.js
 import 'dotenv/config';
 import connectDB from '../config/db.js';
-import GameDAO from '../dao/GameDao.js';
+import GameDAO from '../repo/gameDAO.js';
 import axios from 'axios';
 import mongoose from 'mongoose';
 
 const RAWG_KEY = "0be9054b1c494cb9b21c8d64e941966c";
-const RAWG_URL = `https://api.rawg.io/api/games?key=${RAWG_KEY}&metacritic=85,100&ordering=-added&page_size=100`;
+const RAWG_PAGE_SIZE = 100;
+const RAWG_TOTAL_PAGES = 10;
+const RAWG_URL = (page) => `https://api.rawg.io/api/games?key=${RAWG_KEY}&ordering=-rating&page_size=${RAWG_PAGE_SIZE}&page=${page}`;
 
 const run = async () => {
   try {
@@ -15,10 +17,15 @@ const run = async () => {
     const dao = new GameDAO();
     console.log('🚀 Iniciando importación desde RAWG...');
 
-    // 2) Obtener juegos de RAWG
-    const res = await axios.get(RAWG_URL);
-    const rawgGames = res.data.results || [];
-    
+    // 2) Obtener juegos de RAWG en varias páginas
+    const pages = Array.from({ length: RAWG_TOTAL_PAGES }, (_, idx) => idx + 1);
+    const requests = pages.map(page => axios.get(RAWG_URL(page)));
+    const responses = await Promise.all(requests);
+
+    const rawgGames = responses
+      .flatMap(r => Array.isArray(r.data.results) ? r.data.results : [])
+      .slice(0, RAWG_PAGE_SIZE * RAWG_TOTAL_PAGES);
+
     if (!rawgGames.length) {
       console.log('❌ No se obtuvieron juegos de RAWG.');
       process.exit(0);
