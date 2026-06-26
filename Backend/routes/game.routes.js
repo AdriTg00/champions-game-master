@@ -19,7 +19,8 @@ import { verifyToken, optionalAuth } from '../middleware/auth.js';
 import {
   validateGameCreation,
   validateGameUpdate,
-  validateObjectId
+  validateObjectId,
+  validateNumericParam
 } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -29,14 +30,12 @@ const router = express.Router();
 router.post('/', verifyToken, validateGameCreation, createGame);
 router.get('/', getAllGames);
 
-// Rutas de import / external (deben ir antes de '/:id') - requieren autenticación
-router.get('/external/:id', verifyToken, validateObjectId, fetchExternalGame);
-router.post('/import/:id', verifyToken, validateObjectId, importExternalGame);
+router.get('/external/:id', verifyToken, validateNumericParam, fetchExternalGame);
+router.post('/import/:id', verifyToken, validateNumericParam, importExternalGame);
 router.post('/import', verifyToken, importBatch);
 
-// NUEVAS rutas: import all y compact (antes de '/:id') - requieren autenticación
 router.post('/import-all', verifyToken, importAllFromFreeToGame);
-router.get('/compact', getAllGames);
+router.get('/compact', getCompactGames);
 
 // Random / pick - pick requiere auth
 router.get('/random', getRandomGame);

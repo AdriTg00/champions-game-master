@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import connectDB from '../config/db.js';
-import GameDAO from '../dao/GameDao.js';
+import GameDAO from '../repo/gameDAO.js';
 import mongoose from 'mongoose';
 
 const testCreateGame = async () => {

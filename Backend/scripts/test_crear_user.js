@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import connectDB from '../config/db.js';
 import UserDAO from '../repo/userDAO.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 
 const testCreateUser = async () => {

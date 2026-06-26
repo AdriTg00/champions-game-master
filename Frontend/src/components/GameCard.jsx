@@ -1,10 +1,18 @@
-// src/components/GameCard.jsx
-import React from "react";
+import { useEffect, useRef } from "react";
 
 export default function GameCard({ game, onSelect }) {
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.src) {
+      const pre = new Image();
+      pre.src = imgRef.current.src;
+    }
+  }, []);
+
   if (!game) {
     return (
-      <div className="game-card placeholder">
+      <div className="game-card placeholder" role="status">
         <span>Cargando juego...</span>
       </div>
     );
@@ -15,20 +23,11 @@ export default function GameCard({ game, onSelect }) {
   const img = typeof rawImg === "string" && rawImg.length ? (rawImg.startsWith("//") ? `https:${rawImg}` : rawImg) : null;
   const genres = Array.isArray(game.genres) ? game.genres : (game.genre ? [game.genre] : []);
 
-  try {
-    if (img) {
-      const pre = new Image();
-      pre.src = img;
-    }
-  } catch (e) {
-    // no hacemos nada; no bloquear UI
-  }
-
   return (
-    <button type="button" className="game-card" onClick={() => onSelect && onSelect()}>
+    <button type="button" className="game-card" onClick={() => onSelect && onSelect()} aria-label={`Elegir ${name}`}>
       <div className="game-image">
         {img ? (
-          <img src={img} alt={name} />
+          <img ref={imgRef} src={img} alt={name} loading="lazy" />
         ) : (
           <div className="game-image__fallback">Sin imagen</div>
         )}

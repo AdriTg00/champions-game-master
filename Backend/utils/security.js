@@ -9,6 +9,9 @@ export const sanitizeInput = (input) => {
     .replace(/[<>]/g, '')
     .replace(/javascript:/gi, '')
     .replace(/on\w+=/gi, '')
+    .replace(/[`$]/g, '')
+    .replace(/&#\d+;/g, '')
+    .replace(/data:/gi, '')
     .trim();
 };
 
@@ -42,15 +45,10 @@ export const validatePasswordStrength = (password) => {
   };
 };
 
+import crypto from 'crypto';
+
 export const generateSecureToken = (length = 32) => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  
-  for (let i = 0; i < length; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  
-  return token;
+  return crypto.randomBytes(length).toString('hex');
 };
 
 export const limitResponseSize = (data, maxSize = 1000000) => {

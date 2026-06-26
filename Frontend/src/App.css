@@ -602,3 +602,12 @@ body::before {
     gap: 15px;
   }
 }
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #1a1a2e;
+  color: #00d4ff;
+}

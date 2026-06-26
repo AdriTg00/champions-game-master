@@ -1,16 +1,18 @@
-// config/db.js
 import mongoose from "mongoose";
+import logger from '../utils/logger.js';
 
 const connectDB = async (mongoUri) => {
   try {
     if (!mongoUri) throw new Error("MONGO_URI no definido");
 
-    // Conexión simple: mongoose se encarga de las opciones internamente en versiones recientes
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
 
-    console.log("✅ Conectado a MongoDB");
+    logger.info("Conectado a MongoDB");
   } catch (err) {
-    console.error("❌ Error conectando a MongoDB:", err.message);
+    logger.error("Error conectando a MongoDB:", { message: err.message });
     throw err;
   }
 };

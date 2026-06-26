@@ -1,17 +1,17 @@
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '7d';
+import { config } from '../utils/config.js';
 
 export const generateToken = (user) => {
+  if (!user._id && !user.id) {
+    throw new Error('User ID is required to generate token');
+  }
+
   const payload = {
-    id: user._id || user.id,
-    username: user.username,
-    email: user.email
+    id: user._id || user.id
   };
 
-  return jwt.sign(payload, JWT_SECRET, { 
-    expiresIn: JWT_EXPIRATION,
+  return jwt.sign(payload, config.jwtSecret, { 
+    expiresIn: config.jwtExpiration,
     issuer: 'champions-game'
   });
 };
@@ -26,7 +26,7 @@ export const verifyToken = (req, res, next) => {
 
     const token = authHeader.substring(7);
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.user = decoded;
     req.userId = decoded.id;
     
@@ -42,20 +42,30 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
-// Middleware opcional para rutas que funcionan con o sin autenticación
+export const requireOwnership = (req, res, next) => {
+  const resourceId = req.params.id || req.params.userId;
+  if (!resourceId) {
+    return res.status(400).json({ error: 'ID del recurso no proporcionado' });
+  }
+  if (req.userId !== resourceId) {
+    return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' });
+  }
+  next();
+};
+
 export const optionalAuth = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = jwt.verify(token, config.jwtSecret);
       req.user = decoded;
       req.userId = decoded.id;
     }
     
     next();
-  } catch (error) {
+  } catch {
     next();
   }
 };

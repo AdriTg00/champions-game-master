@@ -15,8 +15,7 @@ const COLORS = {
   RESET: '\x1b[0m'
 };
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const LOG_LEVEL = process.env.LOG_LEVEL || (NODE_ENV === 'production' ? 'INFO' : 'DEBUG');
+import { config } from './config.js';
 
 class Logger {
   constructor() {
@@ -26,24 +25,20 @@ class Logger {
       INFO: 2,
       DEBUG: 3
     };
+    this.currentLevel = config.logLevel || 'DEBUG';
   }
 
   shouldLog(level) {
-    return this.levelPriority[level] <= this.levelPriority[LOG_LEVEL];
+    return this.levelPriority[level] <= this.levelPriority[this.currentLevel];
   }
 
   formatMessage(level, message, meta = {}) {
     const timestamp = new Date().toISOString();
     const color = COLORS[level];
     const reset = COLORS.RESET;
-    
-    let logMessage = `${color}[${timestamp}] [${level}]${reset} ${message}`;
-    
-    if (Object.keys(meta).length > 0) {
-      logMessage += ` ${JSON.stringify(meta)}`;
-    }
-    
-    return logMessage;
+    const logMessage = `${color}[${timestamp}] [${level}]${reset} ${message}`;
+    const hasMeta = Object.keys(meta).length > 0;
+    return hasMeta ? `${logMessage} ${JSON.stringify(meta)}` : logMessage;
   }
 
   error(message, meta = {}) {
@@ -71,15 +66,12 @@ class Logger {
   }
 
   audit(userId, action, resource, details = {}) {
-    const auditLog = {
+    this.info(`AUDIT: ${action} on ${resource}`, {
       userId,
       action,
       resource,
-      timestamp: new Date().toISOString(),
       ...details
-    };
-    
-    this.info(`AUDIT: ${action} on ${resource}`, auditLog);
+    });
   }
 }
 

@@ -145,3 +145,12 @@ export const validateObjectId = [
   
   handleValidationErrors
 ];
+
+export const validateNumericParam = [
+  param('id')
+    .trim()
+    .matches(/^\d+$/)
+    .withMessage('El ID debe ser un valor numérico'),
+  
+  handleValidationErrors
+];

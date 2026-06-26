@@ -2,6 +2,7 @@ import { useEffect, useState, Suspense, lazy, useCallback } from "react";
 import { useAuthStore } from "./store/authStore";
 import { useGameStore } from "./store/gameStore";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { shuffleArray } from "./utils/shuffle";
 const Home = lazy(() => import("./pages/Home"));
 const GameChooser = lazy(() => import("./pages/GameChooser"));
 const Ranking = lazy(() => import("./pages/Ranking"));
@@ -17,32 +18,31 @@ import "./components/Podium3D.css";
 
 import { mockGames } from "./mock/games";
 import client from "./api/client";
-const shuffleArray = (arr) => {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
 
 const MAX_RANDOM_GAMES = 200;
 
 const LoadingSpinner = () => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#1a1a2e',
-    color: '#00d4ff'
-  }}>
+  <div className="loading-spinner" role="status" aria-label="Cargando">
     <p>Cargando...</p>
   </div>
 );
 
+function startGame(games, mockGames, shuffleArray, setters) {
+  const source = games && games.length ? games : mockGames;
+  const shuffled = shuffleArray(source);
+  const selectedGames = shuffled.slice(0, Math.min(shuffled.length, MAX_RANDOM_GAMES));
+  setters.setChampion(null);
+  setters.setLeft(selectedGames[0] ?? null);
+  setters.setRight(selectedGames[1] ?? null);
+  setters.setGames(selectedGames);
+  setters.setBufferIndex(2);
+  setters.setChoiceCount(0);
+  return "game";
+}
+
 export default function App() {
   const { user, token, setUser, logout } = useAuthStore();
+  const gameStore = useGameStore();
   const {
     games,
     champion,
@@ -60,43 +60,28 @@ export default function App() {
     recordVote,
     setLoading,
     reset
-  } = useGameStore();
+  } = gameStore;
 
   const [authScreen, setAuthScreen] = useState("login");
   const [screen, setScreen] = useState("home");
   const [bufferIndex, setBufferIndex] = useState(0);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("currentUser");
-      const storedToken = localStorage.getItem("authToken");
-      if (stored && storedToken) {
-        const parsed = JSON.parse(stored);
-        if (parsed) {
-          setUser(parsed, storedToken);
-          setAuthScreen("app");
-        }
-      }
-    } catch (e) {
-      console.warn("Error loading user from localStorage:", e);
+    if (token && user) {
+      setAuthScreen("app");
     }
-  }, [setUser]);
+  }, [token, user, setUser]);
 
-    const handleLogin = useCallback((userData, authToken) => {
+  const handleLogin = useCallback((userData, authToken) => {
     setUser(userData, authToken);
-    localStorage.setItem("currentUser", JSON.stringify(userData));
-    localStorage.setItem("authToken", authToken);
     setAuthScreen("app");
   }, [setUser]);
 
   const handleLogout = useCallback(() => {
     logout();
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("authToken");
     setAuthScreen("login");
     reset();
   }, [logout, reset]);
-
 
   useEffect(() => {
     let mounted = true;
@@ -104,7 +89,6 @@ export default function App() {
 
     const loadGames = async () => {
       try {
-        // Cargamos los juegos desde MongoDB a través de la API /api/games
         const response = await client.get('/api/games?limit=400');
         const list = Array.isArray(response.data)
           ? response.data
@@ -113,8 +97,7 @@ export default function App() {
         if (mounted) {
           setGames(list.length ? list : mockGames);
         }
-      } catch (err) {
-        console.warn("Fetch games failed, using mockGames:", err.message);
+      } catch {
         if (mounted) {
           setGames(mockGames);
         }
@@ -129,41 +112,34 @@ export default function App() {
     return () => { mounted = false; };
   }, [setGames, setLoading]);
 
-    const start = useCallback(() => {
-    const source = games && games.length ? games : mockGames;
-    const shuffled = shuffleArray(source);
-    const selectedGames = shuffled.slice(0, Math.min(shuffled.length, MAX_RANDOM_GAMES));
-    setChampion(null);
-    setLeft(selectedGames[0] ?? null);
-    setRight(selectedGames[1] ?? null);
-    setGames(selectedGames);
-    setBufferIndex(2);
-    setChoiceCount(0);
-    setScreen("game");
+  const start = useCallback(() => {
+    const newScreen = startGame(games, mockGames, shuffleArray, {
+      setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount
+    });
+    setScreen(newScreen);
   }, [games, setChampion, setLeft, setRight, setGames, setChoiceCount]);
 
-    const markPickOnServer = useCallback(async (gameId) => {
+  const markPickOnServer = useCallback(async (gameId) => {
     if (!gameId) return false;
     try {
       await client.post(`/api/games/pick/${gameId}`);
       return true;
-    } catch (e) {
-      console.warn("Error marking pick on server:", e);
+    } catch {
       return false;
     }
   }, []);
 
-    const getNextFromBuffer = useCallback(() => {
+  const getNextFromBuffer = useCallback(() => {
     if (bufferIndex >= games.length) return null;
     const next = games[bufferIndex];
     setBufferIndex(idx => idx + 1);
     return next;
   }, [bufferIndex, games]);
 
-    const chooseGame = useCallback((selected) => {
+  const chooseGame = useCallback((selected) => {
     if (!selected) return;
 
-    markPickOnServer(selected._id ?? selected.id).catch(() => {});
+    markPickOnServer(selected._id ?? selected.id);
     const nextFromBuffer = getNextFromBuffer();
 
     if (!champion) {
@@ -187,35 +163,24 @@ export default function App() {
       }
     }
 
-    // Usamos el método recordVote del store que ya maneja el incremento y el flag isFinished
     recordVote(selected._id ?? selected.id);
 
     if (choiceCount + 1 >= MAX_CHOICES) {
       setScreen("ranking");
     }
-  }, [champion, left, right, choiceCount, recordVote, markPickOnServer, getNextFromBuffer, setChampion, setRight, setLeft, setChoiceCount]);
+  }, [champion, left, right, choiceCount, recordVote, markPickOnServer, getNextFromBuffer, setChampion, setRight, setLeft, setChoiceCount, setScreen, MAX_CHOICES]);
 
-
-    const restart = useCallback(() => {
-    const source = games && games.length ? games : mockGames;
-    const shuffled = shuffleArray(source);
-    const selectedGames = shuffled.slice(0, Math.min(shuffled.length, MAX_RANDOM_GAMES));
-    setGames(selectedGames);
+  const restart = useCallback(() => {
+    startGame(games, mockGames, shuffleArray, {
+      setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount
+    });
     reset();
-    setBufferIndex(2);
     setScreen("home");
-  }, [games, setGames, reset]);
+  }, [games, setGames, reset, setChampion, setLeft, setRight, setBufferIndex, setChoiceCount]);
 
   const getRankingArray = useCallback(() => {
-    const arr = Object.entries(votesMap)
-      .map(([gameId, voteCount]) => {
-        const game = games.find(g => (g._id ?? g.id) === gameId);
-        return game ? { ...game, count: voteCount } : null;
-      })
-      .filter(Boolean);
-    arr.sort((a, b) => (b.count || 0) - (a.count || 0));
-    return arr;
-  }, [votesMap, games]);
+    return gameStore.getRanking();
+  }, [gameStore, votesMap, games]);
 
   if (loading) {
     return (
@@ -225,7 +190,7 @@ export default function App() {
     );
   }
 
-    return (
+  return (
     <ErrorBoundary>
       <div className="app-shell">
         <div className="app-frame">
@@ -233,57 +198,57 @@ export default function App() {
           <FloatingBackground />
 
           {authScreen !== "app" && (
-        <div className="auth-root">
-          <Suspense fallback={<LoadingSpinner />}>
-            {authScreen === "login" && (
-              <Login
-                onLogin={handleLogin}
-                goRegister={() => setAuthScreen("register")}
-              />
-            )}
-            {authScreen === "register" && (
-              <Register
-                onRegister={() => setAuthScreen("login")}
-                goLogin={() => setAuthScreen("login")}
-              />
-            )}
-          </Suspense>
-        </div>
-      )}
-
-      {authScreen === "app" && (
-        <Suspense fallback={<LoadingSpinner />}>
-          {screen === "home" && (
-            <Home onStart={start} />
+            <div className="auth-root">
+              <Suspense fallback={<LoadingSpinner />}>
+                {authScreen === "login" && (
+                  <Login
+                    onLogin={handleLogin}
+                    goRegister={() => setAuthScreen("register")}
+                  />
+                )}
+                {authScreen === "register" && (
+                  <Register
+                    onRegister={() => setAuthScreen("login")}
+                    goLogin={() => setAuthScreen("login")}
+                  />
+                )}
+              </Suspense>
+            </div>
           )}
 
-          {screen === "game" && (
-            <>
-              <div className="screen-header">
-                <div>
-                  <div className="screen-title">Elección {choiceCount} de {MAX_CHOICES}</div>
-                  <p className="screen-subtitle">Selecciona tu favorito y construye tu ranking personalizado.</p>
-                </div>
-              </div>
+          {authScreen === "app" && (
+            <Suspense fallback={<LoadingSpinner />}>
+              {screen === "home" && (
+                <Home onStart={start} />
+              )}
 
-              <GameChooser
-                champion={champion}
-                opponent={right}
-                left={left}
-                right={right}
-                chooseGame={chooseGame}
-              />
-            </>
-          )}
+              {screen === "game" && (
+                <>
+                  <div className="screen-header">
+                    <div>
+                      <div className="screen-title">Elección {choiceCount} de {MAX_CHOICES}</div>
+                      <p className="screen-subtitle">Selecciona tu favorito y construye tu ranking personalizado.</p>
+                    </div>
+                  </div>
 
-          {screen === "ranking" && (
-            <Ranking
-              ranking={getRankingArray()}
-              onRestart={restart}
-            />
+                  <GameChooser
+                    champion={champion}
+                    opponent={right}
+                    left={left}
+                    right={right}
+                    chooseGame={chooseGame}
+                  />
+                </>
+              )}
+
+              {screen === "ranking" && (
+                <Ranking
+                  ranking={getRankingArray()}
+                  onRestart={restart}
+                />
+              )}
+            </Suspense>
           )}
-        </Suspense>
-      )}
         </div>
       </div>
     </ErrorBoundary>

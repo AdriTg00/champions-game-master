@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./Register.css";
 import client from "../api/client";
 
 export default function Register({ onRegister, goLogin }) {
   const [username, setUsername] = useState("");
-  const [gmail, setGmail] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-      async function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -29,10 +29,10 @@ export default function Register({ onRegister, goLogin }) {
       return;
     }
 
-        try {
+    try {
       const response = await client.post('/api/users', {
         username: username.trim(),
-        email: gmail.trim(),
+        email: email.trim(),
         password
       });
 
@@ -44,20 +44,15 @@ export default function Register({ onRegister, goLogin }) {
         return;
       }
 
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      localStorage.setItem("authToken", token);
-      
       setSuccess("Usuario registrado correctamente. Redirigiendo...");
 
       setTimeout(() => {
         onRegister();
       }, 1000);
     } catch (err) {
-      console.error('Register error:', err);
-      
       if (err.response?.status === 429) {
         setError("Demasiados registros. Por favor intenta más tarde");
-            } else if (err.response?.status === 400) {
+      } else if (err.response?.status === 400) {
         const details = err.response.data?.details;
         if (details && details.length > 0) {
           setError(details[0].message);
@@ -69,7 +64,7 @@ export default function Register({ onRegister, goLogin }) {
       } else {
         setError(err.response?.data?.error || "Error al crear usuario");
       }
-      
+
       setLoading(false);
     }
   }
@@ -78,9 +73,10 @@ export default function Register({ onRegister, goLogin }) {
     <div className="auth-card">
       <h2>Crear Cuenta</h2>
 
-            <form onSubmit={handleSubmit}>
-        <label>Nombre de usuario (3-50 caracteres, alfanumérico)</label>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="reg-username">Nombre de usuario (3-50 caracteres, alfanumérico)</label>
         <input
+          id="reg-username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Tu usuario único..."
@@ -89,19 +85,21 @@ export default function Register({ onRegister, goLogin }) {
           autoComplete="username"
         />
 
-        <label>Email</label>
+        <label htmlFor="reg-email">Email</label>
         <input
+          id="reg-email"
           type="email"
-          value={gmail}
-          onChange={(e) => setGmail(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="tu@email.com"
           disabled={loading}
           required
           autoComplete="email"
         />
 
-        <label>Contraseña (mín. 8 caracteres, con mayúsculas, minúsculas y números)</label>
+        <label htmlFor="reg-password">Contraseña (mín. 8 caracteres, con mayúsculas, minúsculas y números)</label>
         <input
+          id="reg-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -111,8 +109,9 @@ export default function Register({ onRegister, goLogin }) {
           autoComplete="new-password"
         />
 
-        <label>Confirmar contraseña</label>
+        <label htmlFor="reg-confirm">Confirmar contraseña</label>
         <input
+          id="reg-confirm"
           type="password"
           value={confirmar}
           onChange={(e) => setConfirmar(e.target.value)}
@@ -122,8 +121,8 @@ export default function Register({ onRegister, goLogin }) {
           autoComplete="new-password"
         />
 
-        {error && <p className="error">{error}</p>}
-        {success && <p className="success">{success}</p>}
+        {error && <p className="error" role="alert">{error}</p>}
+        {success && <p className="success" role="status">{success}</p>}
 
         <button type="submit" disabled={loading}>
           {loading ? 'Registrando...' : 'Registrarme'}

@@ -41,12 +41,9 @@ export default defineConfig({
     include: ['react', 'react-dom', 'zustand', 'axios']
   },
   
-  // Configuración del servidor de desarrollo
   server: {
     port: 5173,
     strictPort: true,
-    // Habilitar CORS si es necesario
-    cors: true
   },
   
   // Preview (build preview)

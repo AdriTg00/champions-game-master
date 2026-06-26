@@ -32,7 +32,6 @@ body {
   min-width: 320px;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -71,7 +70,8 @@ button:focus-visible {
 }
 
 input,
-textarea {
+textarea,
+[contenteditable] {
   -webkit-user-select: text;
   user-select: text;
 }

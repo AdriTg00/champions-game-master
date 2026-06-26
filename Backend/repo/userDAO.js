@@ -85,10 +85,9 @@ class UserDAO {
     }
   }
 
-  // DELETE - Eliminar usuario
   async delete(id) {
     const deleted = await UserModel.findByIdAndDelete(id);
-    return !!deleted; // true si borró, false si no existía
+    return deleted;
   }
 
   // Existe usuario por ID

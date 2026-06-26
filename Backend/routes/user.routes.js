@@ -7,10 +7,11 @@ import {
   deleteUser,
   loginUser
 } from '../controllers/user.controller.js';
-import { verifyToken } from '../middleware/auth.js';
+import { verifyToken, requireOwnership } from '../middleware/auth.js';
 import {
   validateUserCreation,
   validateUserLogin,
+  validateUserUpdate,
   validateObjectId
 } from '../middleware/validation.js';
 import { loginLimiter, createUserLimiter } from '../middleware/rateLimit.js';
@@ -21,7 +22,7 @@ router.post('/', createUserLimiter, validateUserCreation, createUser);
 router.post('/login', loginLimiter, validateUserLogin, loginUser);
 router.get('/', verifyToken, getAllUsers);
 router.get('/:id', verifyToken, validateObjectId, getUserById);
-router.put('/:id', verifyToken, validateObjectId, updateUser);
-router.delete('/:id', verifyToken, validateObjectId, deleteUser);
+router.put('/:id', verifyToken, validateObjectId, requireOwnership, validateUserUpdate, updateUser);
+router.delete('/:id', verifyToken, validateObjectId, requireOwnership, deleteUser);
 
 export default router;
