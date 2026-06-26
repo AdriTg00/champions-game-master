@@ -1,14 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 
 export default function GameCard({ game, onSelect }) {
-  const imgRef = useRef(null);
-
-  useEffect(() => {
-    if (imgRef.current && imgRef.current.src) {
-      const pre = new Image();
-      pre.src = imgRef.current.src;
-    }
-  }, []);
+  const [imgError, setImgError] = useState(false);
 
   if (!game) {
     return (
@@ -26,8 +19,8 @@ export default function GameCard({ game, onSelect }) {
   return (
     <button type="button" className="game-card" onClick={() => onSelect && onSelect()} aria-label={`Elegir ${name}`}>
       <div className="game-image">
-        {img ? (
-          <img ref={imgRef} src={img} alt={name} loading="lazy" />
+        {img && !imgError ? (
+          <img src={img} alt={name} onError={() => setImgError(true)} referrerPolicy="no-referrer" />
         ) : (
           <div className="game-image__fallback">Sin imagen</div>
         )}

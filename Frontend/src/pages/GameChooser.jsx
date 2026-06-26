@@ -30,6 +30,7 @@ export default function GameChooser({ champion, opponent, left, right, chooseGam
           <img
             src={(champion.image ?? champion.coverUrl ?? champion.thumbnail) || ""}
             alt={champion.title ?? champion.name}
+            referrerPolicy="no-referrer"
             onError={(e) => { e.target.style.display = "none"; }}
           />
           <h3>{champion.title ?? champion.name}</h3>

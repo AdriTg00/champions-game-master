@@ -37,45 +37,49 @@ app.use((req, res) => {
   res.status(404).json({ error: `Ruta no encontrada: ${req.method} ${req.path}` });
 });
 
-let server;
+if (!config.isVercel) {
+  let server;
 
-const gracefulShutdown = async (signal) => {
-  logger.info(`${signal} recibido. Iniciando cierre graceful...`);
-  if (server) {
-    server.close(() => {
-      logger.info('Servidor HTTP cerrado');
-      process.exit(0);
-    });
-    setTimeout(() => {
-      logger.error('Cierre forzado por timeout');
+  const gracefulShutdown = async (signal) => {
+    logger.info(`${signal} recibido. Iniciando cierre graceful...`);
+    if (server) {
+      server.close(() => {
+        logger.info('Servidor HTTP cerrado');
+        process.exit(0);
+      });
+      setTimeout(() => {
+        logger.error('Cierre forzado por timeout');
+        process.exit(1);
+      }, 10000);
+    }
+  };
+
+  const start = async () => {
+    try {
+      await connectDB(config.mongoUri);
+      server = app.listen(config.port, () => {
+        logger.info(`Servidor corriendo en http://localhost:${config.port}`);
+        logger.info(`API disponible en http://localhost:${config.port}/api`);
+      });
+    } catch (err) {
+      logger.error('Error arrancando server:', { message: err.message });
       process.exit(1);
-    }, 10000);
-  }
-};
+    }
+  };
 
-const start = async () => {
-  try {
-    await connectDB(config.mongoUri);
-    server = app.listen(config.port, () => {
-      logger.info(`Servidor corriendo en http://localhost:${config.port}`);
-      logger.info(`API disponible en http://localhost:${config.port}/api`);
-    });
-  } catch (err) {
-    logger.error('Error arrancando server:', err);
-    process.exit(1);
-  }
-};
+  process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled Rejection:', { message: reason?.message || reason });
+  });
 
-process.on('unhandledRejection', (reason) => {
-  logger.error('Unhandled Rejection:', { message: reason?.message || reason });
-});
+  process.on('uncaughtException', (err) => {
+    logger.error('Uncaught Exception:', { message: err.message });
+    gracefulShutdown('uncaughtException');
+  });
 
-process.on('uncaughtException', (err) => {
-  logger.error('Uncaught Exception:', { message: err.message });
-  gracefulShutdown('uncaughtException');
-});
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  start();
+}
 
-start();
+export default app;

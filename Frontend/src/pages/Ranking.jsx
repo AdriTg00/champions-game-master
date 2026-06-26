@@ -43,7 +43,7 @@ export default function Ranking({ ranking = [], onRestart }) {
         {rest.map((g, idx) => (
           <div className="ranking-item" key={g._id ?? g.id ?? idx}>
             <div className="ranking-item-left">
-              <img className="ranking-thumb" src={normalizeImg(g)} alt={g.name ?? g.title} />
+              <img className="ranking-thumb" src={normalizeImg(g)} alt={g.name ?? g.title} referrerPolicy="no-referrer" onError={(e) => { e.target.style.display = "none"; }} />
               <div className="ranking-meta">
                 <div className="ranking-name">{g.name ?? g.title}</div>
                 <div className="ranking-count">Veces elegido: <strong>{g.count ?? 0}</strong></div>
@@ -84,7 +84,7 @@ function PodiumCard({ pos, entry, totalVotes }) {
     <div className={`podium-card podium-card-${pos}`}>
       <div className="podium-rank">#{pos}</div>
       <div className="podium-image-wrap">
-        <img className="podium-image" src={normalizeImg(entry)} alt={entry.name ?? entry.title} />
+        <img className="podium-image" src={normalizeImg(entry)} alt={entry.name ?? entry.title} referrerPolicy="no-referrer" onError={(e) => { e.target.style.display = "none"; }} />
       </div>
       <div className="podium-name">{entry.name ?? entry.title}</div>
       <div className="podium-count">{entry.count ?? 0} votos · {pct}%</div>

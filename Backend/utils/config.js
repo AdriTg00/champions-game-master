@@ -1,14 +1,6 @@
 import { config as dotenvConfig } from 'dotenv';
 dotenvConfig();
 
-const requiredVars = ['MONGO_URI', 'JWT_SECRET'];
-for (const v of requiredVars) {
-  if (!process.env[v]) {
-    console.error(`Missing required environment variable: ${v}`);
-    process.exit(1);
-  }
-}
-
 export const config = {
   port: parseInt(process.env.PORT, 10) || 8080,
   mongoUri: process.env.MONGO_URI,
@@ -17,4 +9,5 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   logLevel: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'INFO' : 'DEBUG'),
   rawgApiKey: process.env.RAWG_API_KEY,
+  isVercel: process.env.VERCEL === '1',
 };
