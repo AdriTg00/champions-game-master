@@ -22,6 +22,10 @@ import {
   validateObjectId,
   validateNumericParam
 } from '../middleware/validation.js';
+import {
+  getThumbnailStatus,
+  backfillThumbnails
+} from '../controllers/game.controller.js';
 
 const router = express.Router();
 
@@ -33,6 +37,9 @@ router.get('/', getAllGames);
 router.get('/external/:id', verifyToken, validateNumericParam, fetchExternalGame);
 router.post('/import/:id', verifyToken, validateNumericParam, importExternalGame);
 router.post('/import', verifyToken, importBatch);
+
+router.get('/thumbnails/status', verifyToken, getThumbnailStatus);
+router.post('/thumbnails/backfill', verifyToken, backfillThumbnails);
 
 router.post('/import-all', verifyToken, importAllFromFreeToGame);
 router.get('/compact', getCompactGames);

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { resolveImg } from "../utils/resolveImg";
 
 export default function GameCard({ game, onSelect }) {
   const [imgError, setImgError] = useState(false);
@@ -12,8 +13,7 @@ export default function GameCard({ game, onSelect }) {
   }
 
   const name = game.name ?? game.title ?? "Sin título";
-  const rawImg = game.image ?? game.coverUrl ?? game.thumbnail ?? game.cover ?? "";
-  const img = typeof rawImg === "string" && rawImg.length ? (rawImg.startsWith("//") ? `https:${rawImg}` : rawImg) : null;
+  const img = resolveImg(game);
   const genres = Array.isArray(game.genres) ? game.genres : (game.genre ? [game.genre] : []);
 
   return (

@@ -2,6 +2,7 @@ import axios from "axios";
 import mongoose from "mongoose";
 import GameDAO from "../repo/gameDAO.js";
 import { escapeRegex } from '../utils/security.js';
+import Game from '../models/Game.js';
 import logger from '../utils/logger.js';
 
 const gameDAO = new GameDAO();
@@ -316,6 +317,70 @@ export const importAllFromFreeToGame = async (req, res) => {
   } catch (err) {
     logger.error("importAllFromFreeToGame:", { message: err.message });
     return res.status(500).json({ error: "Error importando todos los juegos" });
+  }
+};
+
+export const getThumbnailStatus = async (req, res) => {
+  try {
+    const total = await Game.countDocuments();
+    const withThumbnail = await Game.countDocuments({ thumbnail: { $exists: true, $ne: null, $ne: '' } });
+    const withoutThumbnail = total - withThumbnail;
+    const sample = await Game.findOne({ thumbnail: { $exists: true, $ne: null, $ne: '' } }).select('name thumbnail').lean();
+    const sampleWithout = await Game.findOne({ $or: [{ thumbnail: null }, { thumbnail: '' }, { thumbnail: { $exists: false } }] }).select('name externalId').lean();
+
+    return res.status(200).json({
+      total,
+      withThumbnail,
+      withoutThumbnail,
+      sampleWithThumbnail: sample ? { name: sample.name, thumbnail: sample.thumbnail } : null,
+      sampleWithoutThumbnail: sampleWithout ? { name: sampleWithout.name, externalId: sampleWithout.externalId } : null,
+    });
+  } catch (err) {
+    logger.error("getThumbnailStatus:", { message: err.message });
+    return res.status(500).json({ error: "Error al obtener estado de thumbnails" });
+  }
+};
+
+export const backfillThumbnails = async (req, res) => {
+  try {
+    const games = await Game.find({
+      externalId: { $exists: true, $ne: null },
+      $or: [{ thumbnail: null }, { thumbnail: '' }, { thumbnail: { $exists: false } }]
+    }).limit(200).lean();
+
+    if (!games.length) {
+      return res.status(200).json({ message: 'No hay juegos sin thumbnail', processed: 0 });
+    }
+
+    let updated = 0;
+    let failed = 0;
+
+    for (const game of games) {
+      try {
+        const url = `https://www.freetogame.com/api/game?id=${encodeURIComponent(game.externalId)}`;
+        const response = await axios.get(url, { timeout: 8000 });
+        const external = response.data;
+
+        if (external && external.thumbnail) {
+          await Game.findByIdAndUpdate(game._id, { thumbnail: external.thumbnail });
+          updated++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    return res.status(200).json({
+      message: 'Backfill completado',
+      processed: games.length,
+      updated,
+      failed,
+    });
+  } catch (err) {
+    logger.error("backfillThumbnails:", { message: err.message });
+    return res.status(500).json({ error: "Error en backfill de thumbnails" });
   }
 };
 
