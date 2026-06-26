@@ -30,6 +30,15 @@ app.get('/', (req, res) => {
   res.json({ message: 'Api funcionando correctamente' });
 });
 
+app.use(async (req, res, next) => {
+  try {
+    await connectDB(config.mongoUri);
+  } catch {
+    return res.status(503).json({ error: 'Base de datos no disponible' });
+  }
+  next();
+});
+
 app.use('/api/users', userRoutes);
 app.use('/api/games', gameRoutes);
 
