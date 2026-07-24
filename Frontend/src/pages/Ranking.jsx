@@ -1,92 +1,143 @@
-import React from "react";
-import "./Ranking.css";
+import { motion } from "framer-motion";
+import { Trophy, Medal, RotateCcw, Save, Share2 } from "lucide-react";
+import GameCover from "../components/GameCover";
 import { resolveImg } from "../utils/resolveImg";
+import { saveHistoryEntry } from "../store/historyStore";
+import "./Ranking.css";
 
-export default function Ranking({ ranking = [], onRestart }) {
+const GAME_COLORS = {
+  "Elden Ring": { color: "#3a2f1a", accent: "#d4a24a" },
+  "The Legend of Zelda: Breath of the Wild": { color: "#123a2a", accent: "#7fd4a6" },
+  "Red Dead Redemption 2": { color: "#3a1414", accent: "#e07a56" },
+  "Hollow Knight": { color: "#141a2a", accent: "#8ea8d6" },
+  Hades: { color: "#2a0f2a", accent: "#e05a7a" },
+  "The Witcher 3: Wild Hunt": { color: "#1f1a12", accent: "#c8a878" },
+  "God of War Ragnarök": { color: "#1a2230", accent: "#7ab0d4" },
+  "God of War": { color: "#1a2230", accent: "#7ab0d4" },
+  "Baldur's Gate 3": { color: "#241226", accent: "#c68ad6" },
+  Celeste: { color: "#2a1230", accent: "#d68ac6" },
+  "Cyberpunk 2077": { color: "#2a2612", accent: "#f0d840" },
+  "Super Mario Odyssey": { color: "#1a2a1a", accent: "#e05a5a" },
+  "Persona 5 Royal": { color: "#2a0a1a", accent: "#e05a5a" },
+};
+
+function getGameColors(game) {
+  const name = game.title || game.name || "";
+  if (GAME_COLORS[name]) return GAME_COLORS[name];
+  const hash = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const hue = hash % 360;
+  return {
+    color: `oklch(0.2 0.04 ${hue})`,
+    accent: `oklch(0.7 0.15 ${hue})`,
+  };
+}
+
+export default function Ranking({ ranking = [], onRestart, games }) {
   if (!Array.isArray(ranking) || ranking.length === 0) {
     return (
-      <div className="ranking-root">
-        <h2>No hay ranking disponible</h2>
-        <button className="btn" onClick={onRestart}>Volver a empezar</button>
+      <div className="ranking-empty">
+        <h2>No ranking available</h2>
+        <p>Start comparing games to build your ranking.</p>
+        <button className="ranking-btn" onClick={onRestart}>Start over</button>
       </div>
     );
   }
 
-  const totalVotes = ranking.reduce((s, r) => s + (r.count || 0), 0) || 1;
-  const top3 = ranking.slice(0, 3);
-  const rest = ranking.slice(3);
+  const totalCompared = ranking.length;
+
+  const handleSave = () => {
+    const entry = {
+      id: `run-${Date.now()}`,
+      date: new Date().toISOString(),
+      totalCompared,
+      games: ranking.map((g) => ({
+        game: { id: g._id || g.id, title: g.title || g.name, genre: Array.isArray(g.genres) ? g.genres[0] : g.genre || "", year: g.year || 0, platforms: g.platforms || [] },
+        score: g.count || 0,
+      })),
+    };
+    saveHistoryEntry(entry);
+  };
 
   return (
-    <div className="ranking-root">
-      <h1 className="ranking-title">Tu ranking</h1>
-
-      <div className="podium">
-        <div className="podium-col podium-2">
-          {top3[1] ? <PodiumCard pos={2} entry={top3[1]} totalVotes={totalVotes} /> : <EmptyPodium pos={2} />}
+    <div className="ranking-page">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="ranking-header"
+      >
+        <div className="ranking-header-icon">
+          <Trophy size={20} />
         </div>
+        <h1 className="ranking-page-title">Your Personal Game Ranking</h1>
+        <p className="ranking-page-subtitle">
+          Based on {totalCompared} votes
+        </p>
+      </motion.div>
 
-        <div className="podium-col podium-1">
-          {top3[0] ? <PodiumCard pos={1} entry={top3[0]} totalVotes={totalVotes} /> : <EmptyPodium pos={1} />}
+      <div className="ranking-table-wrap">
+        <div className="ranking-table-header">
+          <span>#</span>
+          <span>Cover</span>
+          <span>Game</span>
+          <span className="ranking-table-header-right">Votes</span>
         </div>
-
-        <div className="podium-col podium-3">
-          {top3[2] ? <PodiumCard pos={3} entry={top3[2]} totalVotes={totalVotes} /> : <EmptyPodium pos={3} />}
-        </div>
-      </div>
-
-      <div className="ranking-list">
-        {rest.map((g, idx) => (
-          <div className="ranking-item" key={g._id ?? g.id ?? idx}>
-            <div className="ranking-item-left">
-              <img className="ranking-thumb" src={resolveImg(g) || ""} alt={g.name ?? g.title} referrerPolicy="no-referrer" onError={(e) => { e.target.style.display = "none"; }} />
-              <div className="ranking-meta">
-                <div className="ranking-name">{g.name ?? g.title}</div>
-                <div className="ranking-count">Veces elegido: <strong>{g.count ?? 0}</strong></div>
-              </div>
-            </div>
-
-            <div className="ranking-item-right">
-              <div className="progress-bar" role="progressbar" aria-valuenow={g.count ?? 0} aria-valuemax={totalVotes}>
-                <div
-                  className="progress-bar-fill"
-                  style={{ width: `${Math.round(((g.count ?? 0) / totalVotes) * 100)}%` }}
-                />
-              </div>
-              <div className="ranking-percent">
-                {((g.count ?? 0) / totalVotes * 100).toFixed(0)}%
-              </div>
-            </div>
-          </div>
+        {ranking.map((entry, i) => (
+          <RankRow key={entry._id || entry.id || i} index={i} entry={entry} />
         ))}
       </div>
 
       <div className="ranking-actions">
-        <button className="btn" onClick={onRestart}>Volver a empezar</button>
+        <button className="ranking-btn ranking-btn-outline" onClick={onRestart}>
+          <RotateCcw size={16} /> Restart ranking
+        </button>
+        <button className="ranking-btn ranking-btn-primary" onClick={handleSave}>
+          <Save size={16} /> Save ranking
+        </button>
+        <button className="ranking-btn ranking-btn-outline" onClick={() => navigator.clipboard?.writeText?.(window.location.href)}>
+          <Share2 size={16} /> Share
+        </button>
       </div>
     </div>
   );
 }
 
-function PodiumCard({ pos, entry, totalVotes }) {
-  const pct = Math.round(((entry.count ?? 0) / totalVotes) * 100);
-  return (
-    <div className={`podium-card podium-card-${pos}`}>
-      <div className="podium-rank">#{pos}</div>
-      <div className="podium-image-wrap">
-        <img className="podium-image" src={resolveImg(entry) || ""} alt={entry.name ?? entry.title} referrerPolicy="no-referrer" onError={(e) => { e.target.style.display = "none"; }} />
-      </div>
-      <div className="podium-name">{entry.name ?? entry.title}</div>
-      <div className="podium-count">{entry.count ?? 0} votos · {pct}%</div>
-    </div>
-  );
-}
+function RankRow({ index, entry }) {
+  const name = entry.title ?? entry.name ?? "Unknown";
+  const score = entry.count ?? 0;
+  const genres = Array.isArray(entry.genres) ? entry.genres : (entry.genre ? [entry.genre] : []);
+  const year = entry.year || "";
+  const colors = getGameColors(entry);
+  const imgUrl = resolveImg(entry);
 
-function EmptyPodium({ pos }) {
+  const medalColor = index === 0 ? "var(--gold)" : index === 1 ? "var(--silver)" : index === 2 ? "var(--bronze)" : "";
+  const isPodium = index < 3;
+
   return (
-    <div className={`podium-card podium-card-empty podium-card-${pos}`}>
-      <div className="podium-rank">#{pos}</div>
-      <div className="podium-image-wrap empty" />
-      <div className="podium-name">Sin datos</div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04, duration: 0.4 }}
+      className={`ranking-row${isPodium ? " ranking-row-podium" : ""}`}
+    >
+      <div className="ranking-rank">
+        {isPodium ? <Medal size={14} style={{ color: medalColor }} /> : <span className="ranking-rank-num muted">#</span>}
+        <span style={isPodium ? { color: medalColor } : {}}>{index + 1}</span>
+      </div>
+      <div className="ranking-cover-cell">
+        {imgUrl ? (
+          <img src={imgUrl} alt={name} className="ranking-cover-img" referrerPolicy="no-referrer" />
+        ) : (
+          <GameCover title={name} color={colors.color} accent={colors.accent} className="ranking-cover-img" />
+        )}
+      </div>
+      <div className="ranking-info-cell">
+        <p className="ranking-game-name">{name}</p>
+        <p className="ranking-game-sub">
+          {genres.slice(0, 2).join(" · ")}{year ? ` · ${year}` : ""}
+        </p>
+      </div>
+      <div className="ranking-score-cell">{score}</div>
+    </motion.div>
   );
 }

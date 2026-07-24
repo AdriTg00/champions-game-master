@@ -6,26 +6,28 @@ import { shuffleArray } from "./utils/shuffle";
 const Home = lazy(() => import("./pages/Home"));
 const GameChooser = lazy(() => import("./pages/GameChooser"));
 const Ranking = lazy(() => import("./pages/Ranking"));
+const History = lazy(() => import("./pages/History"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 
-import FloatingBackground from "./components/FloatingBackground";
-import StarsParallax from "./components/StarsParallax";
+import AmbientBackground from "./components/AmbientBackground";
+import Navbar from "./components/Navbar";
 
+import "./index.css";
 import "./App.css";
-import "./components/FloatingBackground.css";
-import "./components/Podium3D.css";
+import "./components/AmbientBackground.css";
+import "./components/Navbar.css";
+import "./components/GameCover.css";
+import "./components/PlatformIcon.css";
+import "./pages/Login.css";
+import "./pages/Ranking.css";
+import "./pages/History.css";
 
 import { mockGames } from "./mock/games";
 import client from "./api/client";
 
 const MAX_RANDOM_GAMES = 200;
-
-const LoadingSpinner = () => (
-  <div className="loading-spinner" role="status" aria-label="Cargando">
-    <p>Cargando...</p>
-  </div>
-);
+const MAX_CHOICES = 25;
 
 function startGame(games, mockGames, shuffleArray, setters) {
   const source = games && games.length ? games : mockGames;
@@ -37,7 +39,6 @@ function startGame(games, mockGames, shuffleArray, setters) {
   setters.setGames(selectedGames);
   setters.setBufferIndex(2);
   setters.setChoiceCount(0);
-  return "game";
 }
 
 export default function App() {
@@ -50,7 +51,6 @@ export default function App() {
     right,
     choiceCount,
     votesMap,
-    MAX_CHOICES,
     loading,
     setGames,
     setChampion,
@@ -59,22 +59,46 @@ export default function App() {
     setChoiceCount,
     recordVote,
     setLoading,
-    reset
+    reset,
   } = gameStore;
 
   const [authScreen, setAuthScreen] = useState("login");
   const [screen, setScreen] = useState("home");
   const [bufferIndex, setBufferIndex] = useState(0);
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem("theme") || "dark"; } catch { return "dark"; }
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("light", theme === "light");
+    root.classList.toggle("dark", theme !== "light");
+    root.style.colorScheme = theme;
+    try { localStorage.setItem("theme", theme); } catch {}
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  }, []);
 
   useEffect(() => {
     if (token && user) {
       setAuthScreen("app");
     }
-  }, [token, user, setUser]);
+  }, [token, user]);
 
   const handleLogin = useCallback((userData, authToken) => {
     setUser(userData, authToken);
     setAuthScreen("app");
+  }, [setUser]);
+
+  const handleRegister = useCallback((userData, authToken) => {
+    if (authToken) {
+      setUser(userData, authToken);
+      setAuthScreen("app");
+    } else {
+      setAuthScreen("login");
+    }
   }, [setUser]);
 
   const handleLogout = useCallback(() => {
@@ -89,7 +113,7 @@ export default function App() {
 
     const loadGames = async () => {
       try {
-        const response = await client.get('/api/games?limit=400');
+        const response = await client.get("/api/games?limit=400");
         const list = Array.isArray(response.data)
           ? response.data
           : response.data.games ?? [];
@@ -113,10 +137,10 @@ export default function App() {
   }, [setGames, setLoading]);
 
   const start = useCallback(() => {
-    const newScreen = startGame(games, mockGames, shuffleArray, {
-      setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount
+    startGame(games, mockGames, shuffleArray, {
+      setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount,
     });
-    setScreen(newScreen);
+    setScreen("game");
   }, [games, setChampion, setLeft, setRight, setGames, setChoiceCount]);
 
   const markPickOnServer = useCallback(async (gameId) => {
@@ -132,7 +156,7 @@ export default function App() {
   const getNextFromBuffer = useCallback(() => {
     if (bufferIndex >= games.length) return null;
     const next = games[bufferIndex];
-    setBufferIndex(idx => idx + 1);
+    setBufferIndex((idx) => idx + 1);
     return next;
   }, [bufferIndex, games]);
 
@@ -144,7 +168,7 @@ export default function App() {
 
     if (!champion) {
       setChampion(selected);
-      const other = (left && (left._id ?? left.id) === (selected._id ?? selected.id)) ? right : left;
+      const other = left && (left._id ?? left.id) === (selected._id ?? selected.id) ? right : left;
       setRight(nextFromBuffer ?? other ?? null);
       setLeft(null);
     } else {
@@ -168,86 +192,88 @@ export default function App() {
     if (choiceCount + 1 >= MAX_CHOICES) {
       setScreen("ranking");
     }
-  }, [champion, left, right, choiceCount, recordVote, markPickOnServer, getNextFromBuffer, setChampion, setRight, setLeft, setChoiceCount, setScreen, MAX_CHOICES]);
+  }, [champion, left, right, choiceCount, recordVote, markPickOnServer, getNextFromBuffer, setChampion, setRight, setLeft, setChoiceCount, setScreen]);
 
   const restart = useCallback(() => {
     startGame(games, mockGames, shuffleArray, {
-      setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount
+      setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount,
     });
     reset();
     setScreen("home");
-  }, [games, setGames, reset, setChampion, setLeft, setRight, setBufferIndex, setChoiceCount]);
+  }, [games, setGames, reset, setChampion, setLeft, setRight, setChoiceCount]);
 
   const getRankingArray = useCallback(() => {
     return gameStore.getRanking();
   }, [gameStore, votesMap, games]);
 
+  const navigateTo = useCallback((target) => {
+    if (target === "logout") {
+      handleLogout();
+    } else {
+      setScreen(target);
+    }
+  }, [handleLogout]);
+
   if (loading) {
     return (
       <ErrorBoundary>
-        <LoadingSpinner />
+        <AmbientBackground />
+        <div className="loading-spinner">
+          <p>Cargando...</p>
+        </div>
       </ErrorBoundary>
     );
   }
 
   return (
     <ErrorBoundary>
+      <AmbientBackground />
       <div className="app-shell">
         <div className="app-frame">
-          <StarsParallax />
-          <FloatingBackground />
-
           {authScreen !== "app" && (
             <div className="auth-root">
-              <Suspense fallback={<LoadingSpinner />}>
+              <Suspense fallback={<div className="loading-spinner"><p>Cargando...</p></div>}>
                 {authScreen === "login" && (
-                  <Login
-                    onLogin={handleLogin}
-                    goRegister={() => setAuthScreen("register")}
-                  />
+                  <Login onLogin={handleLogin} goRegister={() => setAuthScreen("register")} />
                 )}
                 {authScreen === "register" && (
-                  <Register
-                    onRegister={() => setAuthScreen("login")}
-                    goLogin={() => setAuthScreen("login")}
-                  />
+                  <Register onRegister={handleRegister} goLogin={() => setAuthScreen("login")} />
                 )}
               </Suspense>
             </div>
           )}
 
           {authScreen === "app" && (
-            <Suspense fallback={<LoadingSpinner />}>
-              {screen === "home" && (
-                <Home onStart={start} />
-              )}
-
-              {screen === "game" && (
-                <>
-                  <div className="screen-header">
-                    <div>
-                      <div className="screen-title">Elección {choiceCount} de {MAX_CHOICES}</div>
-                      <p className="screen-subtitle">Selecciona tu favorito y construye tu ranking personalizado.</p>
-                    </div>
-                  </div>
-
+            <>
+              <Navbar
+                screen={screen}
+                onNavigate={navigateTo}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+              />
+              <Suspense fallback={<div className="loading-spinner"><p>Cargando...</p></div>}>
+                {screen === "home" && <Home onStart={start} />}
+                {screen === "game" && (
                   <GameChooser
+                    games={games}
                     champion={champion}
-                    opponent={right}
                     left={left}
                     right={right}
+                    choiceCount={choiceCount}
+                    MAX_CHOICES={MAX_CHOICES}
                     chooseGame={chooseGame}
                   />
-                </>
-              )}
-
-              {screen === "ranking" && (
-                <Ranking
-                  ranking={getRankingArray()}
-                  onRestart={restart}
-                />
-              )}
-            </Suspense>
+                )}
+                {screen === "ranking" && (
+                  <Ranking
+                    ranking={getRankingArray()}
+                    onRestart={restart}
+                    games={games}
+                  />
+                )}
+                {screen === "history" && <History onNavigate={navigateTo} />}
+              </Suspense>
+            </>
           )}
         </div>
       </div>

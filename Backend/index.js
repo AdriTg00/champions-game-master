@@ -60,6 +60,8 @@ if (!config.isVercel) {
         logger.error('Cierre forzado por timeout');
         process.exit(1);
       }, 10000);
+    } else {
+      process.exit(0);
     }
   };
 

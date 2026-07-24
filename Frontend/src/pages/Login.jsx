@@ -1,6 +1,8 @@
 import { useState } from "react";
-import "./Login.css";
+import { motion } from "framer-motion";
+import { Swords, ArrowRight } from "lucide-react";
 import client from "../api/client";
+import "./Login.css";
 
 export default function Login({ onLogin, goRegister }) {
   const [username, setUsername] = useState("");
@@ -14,13 +16,12 @@ export default function Login({ onLogin, goRegister }) {
     setLoading(true);
 
     try {
-      const response = await client.post('/api/users/login', {
+      const response = await client.post("/api/users/login", {
         username: username.trim(),
-        password
+        password,
       });
 
       const { token, user } = response.data;
-
       if (!token) {
         setError("Error: No se recibió token de autenticación");
         setLoading(false);
@@ -28,59 +29,84 @@ export default function Login({ onLogin, goRegister }) {
       }
 
       onLogin(user, token);
-
     } catch (err) {
       if (err.response?.status === 429) {
-        setError("Demasiados intentos de login. Por favor intenta en 15 minutos");
+        setError("Demasiados intentos. Por favor intenta en 15 minutos");
       } else if (err.response?.status === 401) {
         setError("Usuario o contraseña incorrectos");
-      } else if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED') {
+      } else if (err.code === "ERR_NETWORK" || err.code === "ECONNABORTED") {
         setError("No se pudo conectar con el servidor. Verifica que el backend esté corriendo en el puerto 8080");
       } else {
         setError(err.response?.data?.error || "Error al iniciar sesión");
       }
-
       setLoading(false);
     }
   }
 
   return (
-    <div className="auth-card">
-      <h2>Iniciar Sesión</h2>
+    <div className="auth-root-new">
+      <div className="auth-grid-bg" />
+      <div className="auth-gradient" />
+      <div className="auth-container">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="auth-card-new"
+        >
+          <div className="auth-card-header">
+            <div className="auth-icon">
+              <Swords size={20} />
+            </div>
+            <h1 className="auth-card-title">Welcome back</h1>
+            <p className="auth-card-subtitle">Sign in to build your personal game ranking.</p>
+          </div>
 
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="login-username">Nombre de usuario</label>
-        <input
-          id="login-username"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          placeholder="Tu usuario..."
-          disabled={loading}
-          required
-          autoComplete="username"
-        />
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="auth-field">
+              <label htmlFor="login-username" className="auth-label">Username</label>
+              <input
+                id="login-username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="alex"
+                className="auth-input"
+                disabled={loading}
+                required
+                autoComplete="username"
+              />
+            </div>
+            <div className="auth-field">
+              <label htmlFor="login-password" className="auth-label">Password</label>
+              <input
+                id="login-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="auth-input"
+                disabled={loading}
+                required
+                autoComplete="current-password"
+              />
+            </div>
 
-        <label htmlFor="login-password">Contraseña</label>
-        <input
-          id="login-password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          placeholder="••••••"
-          disabled={loading}
-          required
-          autoComplete="current-password"
-        />
+            {error && <p className="auth-error" role="alert">{error}</p>}
 
-        {error && <p className="error" role="alert">{error}</p>}
+            <button type="submit" disabled={loading} className="auth-submit">
+              {loading ? "Signing in..." : "Sign in"}
+              <ArrowRight size={16} />
+            </button>
+          </form>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Entrando...' : 'Entrar'}
-        </button>
-        <button type="button" onClick={goRegister} disabled={loading}>
-          Crear cuenta
-        </button>
-      </form>
+          <p className="auth-footer-text">
+            New here?{" "}
+            <button type="button" onClick={goRegister} className="auth-link">
+              Create an account
+            </button>
+          </p>
+        </motion.div>
+      </div>
     </div>
   );
 }
