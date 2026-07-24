@@ -213,6 +213,8 @@ export default function App() {
   const navigateTo = useCallback((target) => {
     if (target === "logout") {
       handleLogout();
+    } else if (target === "login") {
+      setAuthScreen("login");
     } else {
       setScreen(target);
     }
