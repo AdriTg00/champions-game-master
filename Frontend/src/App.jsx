@@ -215,10 +215,12 @@ export default function App() {
       handleLogout();
     } else if (target === "login") {
       setAuthScreen("login");
+    } else if (target === "game" && choiceCount >= MAX_CHOICES) {
+      restart();
     } else {
       setScreen(target);
     }
-  }, [handleLogout]);
+  }, [handleLogout, choiceCount, restart]);
 
   return (
     <>
