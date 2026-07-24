@@ -33,10 +33,10 @@ app.get('/', (req, res) => {
 app.use(async (req, res, next) => {
   try {
     await connectDB();
+    next();
   } catch {
-    return res.status(503).json({ error: 'Base de datos no disponible' });
+    res.status(503).json({ error: 'Base de datos no disponible' });
   }
-  next();
 });
 
 app.use('/api/users', userRoutes);
