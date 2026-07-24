@@ -1,4 +1,5 @@
 import React from 'react';
+import { LangContext } from '../i18n/useTranslations';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -10,13 +11,15 @@ class ErrorBoundary extends React.Component {
     };
   }
 
+  static contextType = LangContext;
+
   static getDerivedStateFromError(error) {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
     console.error('Error capturado por ErrorBoundary:', error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo
@@ -25,6 +28,8 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      const { t } = this.context || { t: (k) => k };
+
       return (
         <div style={{
           display: 'flex',
@@ -37,12 +42,12 @@ class ErrorBoundary extends React.Component {
           padding: '20px',
           textAlign: 'center'
         }}>
-          <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>Error</h1>
-          <h2 style={{ marginBottom: '10px' }}>¡Oops! Algo salió mal</h2>
+          <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>{t("error.title")}</h1>
+          <h2 style={{ marginBottom: '10px' }}>{t("error.heading")}</h2>
           <p style={{ opacity: 0.7, marginBottom: '20px' }}>
-            Ha ocurrido un error inesperado
+            {t("error.message")}
           </p>
-          
+
           {import.meta.env.DEV && this.state.error && (
             <details style={{
               marginTop: '20px',
@@ -54,9 +59,9 @@ class ErrorBoundary extends React.Component {
               fontSize: '14px'
             }}>
               <summary style={{ cursor: 'pointer', marginBottom: '10px' }}>
-                Ver detalles del error
+                {t("error.details")}
               </summary>
-              <pre style={{ 
+              <pre style={{
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 fontSize: '12px'
@@ -66,7 +71,7 @@ class ErrorBoundary extends React.Component {
               </pre>
             </details>
           )}
-          
+
           <button
             onClick={() => window.location.reload()}
             style={{
@@ -84,7 +89,7 @@ class ErrorBoundary extends React.Component {
             onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
             onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
           >
-            Recargar página
+            {t("error.reload")}
           </button>
         </div>
       );

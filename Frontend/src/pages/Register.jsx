@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { Swords, ArrowRight, Check, X } from "lucide-react";
 import client from "../api/client";
+import { useLang } from "../i18n/useTranslations";
 
 function Field({ label, hint, children }) {
+  const { t } = useLang();
   return (
     <div className="auth-field">
       <div className="auth-field-label-row">
         <label className="auth-label">{label}</label>
         {hint === "ok" && (
           <span className="auth-hint-ok">
-            <Check size={12} /> looks good
+            <Check size={12} /> {t("auth.looksGood")}
           </span>
         )}
         {hint === "bad" && (
           <span className="auth-hint-bad">
-            <X size={12} /> check this
+            <X size={12} /> {t("auth.checkThis")}
           </span>
         )}
       </div>
@@ -28,6 +30,7 @@ export default function Register({ onRegister, goLogin }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useLang();
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
   const passStrong = form.password.length >= 8;
@@ -41,13 +44,13 @@ export default function Register({ onRegister, goLogin }) {
     setLoading(true);
 
     if (form.password !== form.confirm) {
-      setError("Las contraseñas no coinciden");
+      setError(t("auth.passwordsDontMatch"));
       setLoading(false);
       return;
     }
 
     if (form.password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
+      setError(t("auth.passwordTooShort"));
       setLoading(false);
       return;
     }
@@ -62,29 +65,29 @@ export default function Register({ onRegister, goLogin }) {
       const { token, user } = response.data;
 
       if (!token) {
-        setError("Error: No se recibió token de autenticación");
+        setError(t("auth.noToken"));
         setLoading(false);
         return;
       }
 
-      setSuccess("Usuario registrado correctamente. Redirigiendo...");
+      setSuccess(t("auth.registeredOk"));
       setTimeout(() => {
         onRegister(user, token);
       }, 1000);
     } catch (err) {
       if (err.response?.status === 429) {
-        setError("Demasiados registros. Por favor intenta más tarde");
+        setError(t("auth.tooManyRegistrations"));
       } else if (err.response?.status === 400) {
         const details = err.response.data?.details;
         if (details?.length > 0) {
           setError(details[0].message);
         } else {
-          setError(err.response.data?.error || "No se pudo crear el usuario");
+          setError(err.response.data?.error || t("auth.createUserError"));
         }
       } else if (err.code === "ERR_NETWORK") {
-        setError("No se pudo conectar con el servidor");
+        setError(t("auth.serverError"));
       } else {
-        setError(err.response?.data?.error || "Error al crear usuario");
+        setError(err.response?.data?.error || t("auth.registerError"));
       }
       setLoading(false);
     }
@@ -100,16 +103,16 @@ export default function Register({ onRegister, goLogin }) {
             <div className="auth-icon">
               <Swords size={20} />
             </div>
-            <h1 className="auth-card-title">Create your account</h1>
-            <p className="auth-card-subtitle">Start ranking games in under a minute.</p>
+            <h1 className="auth-card-title">{t("auth.createYourAccount")}</h1>
+            <p className="auth-card-subtitle">{t("auth.registerSubtitle")}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <Field label="Username">
+            <Field label={t("auth.username")}>
               <input
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
-                placeholder="alex"
+                placeholder={t("auth.usernamePlaceholder")}
                 className="auth-input"
                 disabled={loading}
                 required
@@ -117,12 +120,12 @@ export default function Register({ onRegister, goLogin }) {
               />
             </Field>
 
-            <Field label="Email" hint={form.email ? (emailValid ? "ok" : "bad") : undefined}>
+            <Field label={t("auth.email")} hint={form.email ? (emailValid ? "ok" : "bad") : undefined}>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@domain.com"
+                placeholder={t("auth.emailPlaceholder")}
                 className={`auth-input${form.email && !emailValid ? " auth-input-error" : ""}`}
                 disabled={loading}
                 required
@@ -130,12 +133,12 @@ export default function Register({ onRegister, goLogin }) {
               />
             </Field>
 
-            <Field label="Password" hint={form.password ? (passStrong ? "ok" : "bad") : undefined}>
+            <Field label={t("auth.password")} hint={form.password ? (passStrong ? "ok" : "bad") : undefined}>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="At least 8 characters"
+                placeholder={t("auth.minChars")}
                 className={`auth-input${form.password && !passStrong ? " auth-input-error" : ""}`}
                 disabled={loading}
                 required
@@ -143,12 +146,12 @@ export default function Register({ onRegister, goLogin }) {
               />
             </Field>
 
-            <Field label="Confirm password" hint={form.confirm ? (passMatch ? "ok" : "bad") : undefined}>
+            <Field label={t("auth.confirmPassword")} hint={form.confirm ? (passMatch ? "ok" : "bad") : undefined}>
               <input
                 type="password"
                 value={form.confirm}
                 onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-                placeholder="Repeat password"
+                placeholder={t("auth.repeatPassword")}
                 className={`auth-input${form.confirm && !passMatch ? " auth-input-error" : ""}`}
                 disabled={loading}
                 required
@@ -160,15 +163,15 @@ export default function Register({ onRegister, goLogin }) {
             {success && <p className="auth-success" role="status">{success}</p>}
 
             <button type="submit" disabled={!canSubmit || loading} className="auth-submit">
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? t("auth.creatingAccount") : t("auth.createAccountBtn")}
               <ArrowRight size={16} />
             </button>
           </form>
 
           <p className="auth-footer-text">
-            Already have an account?{" "}
+            {t("auth.alreadyHaveAccount")}{" "}
             <button type="button" onClick={goLogin} className="auth-link">
-              Sign in
+              {t("auth.signInLink")}
             </button>
           </p>
         </div>

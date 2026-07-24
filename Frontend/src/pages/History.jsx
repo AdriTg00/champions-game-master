@@ -2,10 +2,12 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { History as HistoryIcon, ChevronRight } from "lucide-react";
 import { loadHistory } from "../store/historyStore";
+import { useLang } from "../i18n/useTranslations";
 import "./History.css";
 
 export default function History({ onNavigate }) {
   const [list, setList] = useState([]);
+  const { t } = useLang();
 
   useEffect(() => {
     setList(loadHistory());
@@ -20,8 +22,8 @@ export default function History({ onNavigate }) {
         className="history-header"
       >
         <div>
-          <h1 className="history-title">Ranking history</h1>
-          <p className="history-subtitle">Every ranking you've built, saved locally.</p>
+          <h1 className="history-title">{t("history.title")}</h1>
+          <p className="history-subtitle">{t("history.subtitle")}</p>
         </div>
         <div className="history-header-icon">
           <HistoryIcon size={16} />
@@ -30,18 +32,18 @@ export default function History({ onNavigate }) {
 
       {list.length === 0 ? (
         <div className="history-empty">
-          <p className="history-empty-text">No rankings yet.</p>
+          <p className="history-empty-text">{t("history.empty")}</p>
           <button className="ranking-btn ranking-btn-primary" onClick={() => onNavigate("game")}>
-            Start comparing
+            {t("history.startComparing")}
           </button>
         </div>
       ) : (
         <div className="history-table-wrap">
           <div className="history-table-header">
-            <span>Date</span>
-            <span>Games compared</span>
-            <span>Winner</span>
-            <span className="history-table-header-right">Action</span>
+            <span>{t("history.date")}</span>
+            <span>{t("history.gamesCompared")}</span>
+            <span>{t("history.winner")}</span>
+            <span className="history-table-header-right">{t("history.action")}</span>
           </div>
           {list.map((r, i) => (
             <motion.div
@@ -58,14 +60,14 @@ export default function History({ onNavigate }) {
                   day: "numeric",
                 })}
               </span>
-              <span className="history-compared">{r.totalCompared} comparisons</span>
+              <span className="history-compared">{r.totalCompared} {t("game.comparisons")}</span>
               <span className="history-winner">{r.games?.[0]?.game?.title ?? "—"}</span>
               <div className="history-action">
                 <button
                   className="history-view-btn"
                   onClick={() => onNavigate("ranking")}
                 >
-                  View <ChevronRight size={14} />
+                  {t("history.view")} <ChevronRight size={14} />
                 </button>
               </div>
             </motion.div>

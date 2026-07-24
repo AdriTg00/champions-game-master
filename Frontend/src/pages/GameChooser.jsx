@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import GameCard from "../components/GameCard";
 import { resolveImg } from "../utils/resolveImg";
+import { useLang } from "../i18n/useTranslations";
 
 export default function GameChooser({
   games,
@@ -12,12 +13,13 @@ export default function GameChooser({
   MAX_CHOICES,
   chooseGame,
 }) {
+  const { t } = useLang();
   const hasChampion = !!champion;
 
   if (games.length === 0) {
     return (
       <div className="chooser-empty">
-        <p>Cargando juegos...</p>
+        <p>{t("game.loading")}</p>
       </div>
     );
   }
@@ -46,6 +48,7 @@ export default function GameChooser({
 }
 
 function ProgressBlock({ round, total }) {
+  const { t } = useLang();
   const pct = total > 0 ? Math.round((round / total) * 100) : 0;
   return (
     <motion.div
@@ -56,14 +59,14 @@ function ProgressBlock({ round, total }) {
     >
       <div className="progress-header">
         <div>
-          <p className="progress-label">Round</p>
+          <p className="progress-label">{t("game.round")}</p>
           <p className="progress-value">
             {round} <span className="progress-total">/ {total}</span>
           </p>
         </div>
         <div className="progress-right">
-          <p className="progress-label">Remaining</p>
-          <p className="progress-remaining">{Math.max(0, total - round)} comparisons</p>
+          <p className="progress-label">{t("game.remaining")}</p>
+          <p className="progress-remaining">{Math.max(0, total - round)} {t("game.comparisons")}</p>
         </div>
       </div>
       <div className="progress-track">
@@ -77,6 +80,7 @@ function ProgressBlock({ round, total }) {
 }
 
 function VS() {
+  const { t } = useLang();
   return (
     <div className="vs-divider">
       <div className="vs-glow" />
@@ -86,7 +90,7 @@ function VS() {
         transition={{ delay: 0.2, duration: 0.5 }}
         className="vs-text"
       >
-        VS
+        {t("game.vs")}
       </motion.span>
     </div>
   );
@@ -122,10 +126,11 @@ function SlotSide({ side, game, losing, locked, onChoose, showImage }) {
 }
 
 function InitialMode({ left, right, choiceCount, MAX_CHOICES, chooseGame }) {
+  const { t } = useLang();
   if (!left || !right) {
     return (
       <div className="chooser-empty">
-        <p>Preparando oponentes...</p>
+        <p>{t("game.preparing")}</p>
       </div>
     );
   }
@@ -143,6 +148,7 @@ function InitialMode({ left, right, choiceCount, MAX_CHOICES, chooseGame }) {
 }
 
 function ChampionMode({ champion, opponent, choiceCount, MAX_CHOICES, chooseGame }) {
+  const { t } = useLang();
   const champImg = resolveImg(champion);
   const champName = champion.title ?? champion.name ?? "";
 
@@ -158,7 +164,7 @@ function ChampionMode({ champion, opponent, choiceCount, MAX_CHOICES, chooseGame
           <img src={champImg} alt={champName} className="champion-banner-img" referrerPolicy="no-referrer" />
         )}
         <div className="champion-banner-info">
-          <span className="champion-banner-label">Current champion</span>
+          <span className="champion-banner-label">{t("game.champion")}</span>
           <h2 className="champion-banner-name">{champName}</h2>
         </div>
       </motion.div>

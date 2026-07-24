@@ -16,6 +16,9 @@ function normalizeDoc(doc) {
     genre: doc.genre,
     platform: doc.platform,
     picked: doc.picked,
+    metacritic: doc.metacritic,
+    rating: doc.rating,
+    released: doc.released,
     createdAt: doc.createdAt,
   };
 }

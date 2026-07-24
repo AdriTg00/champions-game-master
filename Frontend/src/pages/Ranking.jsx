@@ -3,6 +3,7 @@ import { Trophy, Medal, RotateCcw, Save, Share2 } from "lucide-react";
 import GameCover from "../components/GameCover";
 import { resolveImg } from "../utils/resolveImg";
 import { saveHistoryEntry } from "../store/historyStore";
+import { useLang } from "../i18n/useTranslations";
 import "./Ranking.css";
 
 const GAME_COLORS = {
@@ -33,12 +34,14 @@ function getGameColors(game) {
 }
 
 export default function Ranking({ ranking = [], onRestart, games }) {
+  const { t } = useLang();
+
   if (!Array.isArray(ranking) || ranking.length === 0) {
     return (
       <div className="ranking-empty">
-        <h2>No ranking available</h2>
-        <p>Start comparing games to build your ranking.</p>
-        <button className="ranking-btn" onClick={onRestart}>Start over</button>
+        <h2>{t("ranking.noRanking")}</h2>
+        <p>{t("ranking.startComparing")}</p>
+        <button className="ranking-btn" onClick={onRestart}>{t("ranking.startOver")}</button>
       </div>
     );
   }
@@ -69,18 +72,18 @@ export default function Ranking({ ranking = [], onRestart, games }) {
         <div className="ranking-header-icon">
           <Trophy size={20} />
         </div>
-        <h1 className="ranking-page-title">Your Personal Game Ranking</h1>
+        <h1 className="ranking-page-title">{t("ranking.title")}</h1>
         <p className="ranking-page-subtitle">
-          Based on {totalCompared} votes
+          {t("ranking.basedOn", { count: totalCompared })}
         </p>
       </motion.div>
 
       <div className="ranking-table-wrap">
         <div className="ranking-table-header">
-          <span>#</span>
-          <span>Cover</span>
-          <span>Game</span>
-          <span className="ranking-table-header-right">Votes</span>
+          <span>{t("ranking.hash")}</span>
+          <span>{t("ranking.cover")}</span>
+          <span>{t("ranking.game")}</span>
+          <span className="ranking-table-header-right">{t("ranking.votes")}</span>
         </div>
         {ranking.map((entry, i) => (
           <RankRow key={entry._id || entry.id || i} index={i} entry={entry} />
@@ -89,13 +92,13 @@ export default function Ranking({ ranking = [], onRestart, games }) {
 
       <div className="ranking-actions">
         <button className="ranking-btn ranking-btn-outline" onClick={onRestart}>
-          <RotateCcw size={16} /> Restart ranking
+          <RotateCcw size={16} /> {t("ranking.restart")}
         </button>
         <button className="ranking-btn ranking-btn-primary" onClick={handleSave}>
-          <Save size={16} /> Save ranking
+          <Save size={16} /> {t("ranking.save")}
         </button>
         <button className="ranking-btn ranking-btn-outline" onClick={() => navigator.clipboard?.writeText?.(window.location.href)}>
-          <Share2 size={16} /> Share
+          <Share2 size={16} /> {t("ranking.share")}
         </button>
       </div>
     </div>

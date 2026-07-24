@@ -3,6 +3,7 @@ import { Calendar, Tag } from "lucide-react";
 import { resolveImg } from "../utils/resolveImg";
 import GameCover from "./GameCover";
 import PlatformIcon from "./PlatformIcon";
+import { useLang } from "../i18n/useTranslations";
 
 const GAME_COLORS = {
   "Elden Ring": { color: "#3a2f1a", accent: "#d4a24a" },
@@ -35,15 +36,17 @@ function getGameColors(game) {
 }
 
 export default function GameCard({ game, onChoose, disabled, side, showImage }) {
+  const { t } = useLang();
+
   if (!game) {
     return (
       <div className="game-card game-card-placeholder">
-        <span>Cargando juego...</span>
+        <span>{t("game.loadingGame")}</span>
       </div>
     );
   }
 
-  const name = game.title ?? game.name ?? "Sin título";
+  const name = game.title ?? game.name ?? t("game.noTitle");
   const imgUrl = resolveImg(game);
   const genres = Array.isArray(game.genres) ? game.genres : (game.genre ? [game.genre] : []);
   const year = game.year || "";
@@ -65,7 +68,7 @@ export default function GameCard({ game, onChoose, disabled, side, showImage }) 
         )}
         {side && (
           <span className="game-card-badge">
-            {side === "left" ? "Contender A" : "Contender B"}
+            {side === "left" ? t("game.contenderA") : t("game.contenderB")}
           </span>
         )}
       </div>
@@ -100,7 +103,7 @@ export default function GameCard({ game, onChoose, disabled, side, showImage }) 
           disabled={disabled}
           className="game-card-btn"
         >
-          Choose
+          {t("game.choose")}
         </button>
       </div>
     </motion.div>

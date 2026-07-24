@@ -1,4 +1,3 @@
-// models/Game.js
 import mongoose from "mongoose";
 
 const gameSchema = new mongoose.Schema({
@@ -35,13 +34,24 @@ const gameSchema = new mongoose.Schema({
     default: false,
     index: true
   },
+  metacritic: {
+    type: Number,
+    default: null
+  },
+  rating: {
+    type: Number,
+    default: null
+  },
+  released: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
-// índice único opcional para externalId (evita duplicados por fuente externa)
 gameSchema.index({ externalId: 1 }, { unique: true, sparse: true });
 
 export default mongoose.model("Game", gameSchema);

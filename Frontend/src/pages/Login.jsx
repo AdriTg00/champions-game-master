@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Swords, ArrowRight } from "lucide-react";
 import client from "../api/client";
+import { useLang } from "../i18n/useTranslations";
 import "./Login.css";
 
 export default function Login({ onLogin, goRegister }) {
@@ -8,6 +9,7 @@ export default function Login({ onLogin, goRegister }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useLang();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -22,7 +24,7 @@ export default function Login({ onLogin, goRegister }) {
 
       const { token, user } = response.data;
       if (!token) {
-        setError("Error: No se recibió token de autenticación");
+        setError(t("auth.noToken"));
         setLoading(false);
         return;
       }
@@ -30,13 +32,13 @@ export default function Login({ onLogin, goRegister }) {
       onLogin(user, token);
     } catch (err) {
       if (err.response?.status === 429) {
-        setError("Demasiados intentos. Por favor intenta en 15 minutos");
+        setError(t("auth.tooManyAttempts"));
       } else if (err.response?.status === 401) {
-        setError("Usuario o contraseña incorrectos");
+        setError(t("auth.invalidCredentials"));
       } else if (err.code === "ERR_NETWORK" || err.code === "ECONNABORTED") {
-        setError("No se pudo conectar con el servidor. Verifica que el backend esté corriendo en el puerto 8080");
+        setError(t("auth.serverConnection"));
       } else {
-        setError(err.response?.data?.error || "Error al iniciar sesión");
+        setError(err.response?.data?.error || t("auth.loginError"));
       }
       setLoading(false);
     }
@@ -52,18 +54,18 @@ export default function Login({ onLogin, goRegister }) {
             <div className="auth-icon">
               <Swords size={20} />
             </div>
-            <h1 className="auth-card-title">Welcome back</h1>
-            <p className="auth-card-subtitle">Sign in to build your personal game ranking.</p>
+            <h1 className="auth-card-title">{t("auth.welcomeBack")}</h1>
+            <p className="auth-card-subtitle">{t("auth.signInSubtitle")}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="auth-field">
-              <label htmlFor="login-username" className="auth-label">Username</label>
+              <label htmlFor="login-username" className="auth-label">{t("auth.username")}</label>
               <input
                 id="login-username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="alex"
+                placeholder={t("auth.usernamePlaceholder")}
                 className="auth-input"
                 disabled={loading}
                 required
@@ -71,13 +73,13 @@ export default function Login({ onLogin, goRegister }) {
               />
             </div>
             <div className="auth-field">
-              <label htmlFor="login-password" className="auth-label">Password</label>
+              <label htmlFor="login-password" className="auth-label">{t("auth.password")}</label>
               <input
                 id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t("auth.passwordPlaceholder")}
                 className="auth-input"
                 disabled={loading}
                 required
@@ -88,15 +90,15 @@ export default function Login({ onLogin, goRegister }) {
             {error && <p className="auth-error" role="alert">{error}</p>}
 
             <button type="submit" disabled={loading} className="auth-submit">
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? t("auth.signingIn") : t("auth.signIn")}
               <ArrowRight size={16} />
             </button>
           </form>
 
           <p className="auth-footer-text">
-            New here?{" "}
+            {t("auth.newHere")}{" "}
             <button type="button" onClick={goRegister} className="auth-link">
-              Create an account
+              {t("auth.createAccount")}
             </button>
           </p>
         </div>

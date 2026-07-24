@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { Swords, ArrowRight } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import { useLang } from "../i18n/useTranslations";
 
 export default function Home({ onStart }) {
   const { user } = useAuthStore();
+  const { t } = useLang();
 
   return (
     <div className="home-root">
@@ -16,12 +18,12 @@ export default function Home({ onStart }) {
         <div className="home-icon">
           <Swords size={20} />
         </div>
-        <h1 className="home-title">Choose Your Game</h1>
+        <h1 className="home-title">{t("home.title")}</h1>
         <p className="home-desc">
-          Welcome{user?.username ? `, ${user.username}` : ""}! Build your personal game ranking through head-to-head comparisons.
+          {t("home.welcome", { username: user?.username ? `, ${user.username}` : "" })}
         </p>
         <button onClick={onStart} className="home-btn">
-          Start Comparing
+          {t("home.start")}
           <ArrowRight size={16} />
         </button>
       </motion.div>

@@ -81,6 +81,9 @@
   border: 1px solid var(--border);
   background: var(--card);
   box-shadow: var(--shadow-elegant);
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
 }
 
 .game-card-placeholder {
@@ -95,7 +98,7 @@
 
 .game-card-cover-wrap {
   position: relative;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 2;
   width: 100%;
   overflow: hidden;
 }
@@ -278,7 +281,7 @@
 
 .slot-side {
   position: relative;
-  min-height: 520px;
+  min-height: 420px;
 }
 
 /* ====== VS DIVIDER ====== */

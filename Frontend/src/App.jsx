@@ -2,12 +2,14 @@ import { useEffect, useState, Suspense, lazy, useCallback, memo } from "react";
 import { useAuthStore } from "./store/authStore";
 import { useGameStore } from "./store/gameStore";
 import { shuffleArray } from "./utils/shuffle";
+import { useLang } from "./i18n/useTranslations";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 const Home = lazy(() => import("./pages/Home"));
 const GameChooser = lazy(() => import("./pages/GameChooser"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const History = lazy(() => import("./pages/History"));
+const TierList = lazy(() => import("./pages/TierList"));
 
 import AmbientBackground from "./components/AmbientBackground";
 import Navbar from "./components/Navbar";
@@ -21,6 +23,7 @@ import "./components/PlatformIcon.css";
 import "./pages/Login.css";
 import "./pages/Ranking.css";
 import "./pages/History.css";
+import "./pages/TierList.css";
 
 import { mockGames } from "./mock/games";
 import client from "./api/client";
@@ -69,6 +72,7 @@ export default function App() {
   const goRegister = useCallback(() => setAuthScreen("register"), []);
   const goLogin = useCallback(() => setAuthScreen("login"), []);
   const [bufferIndex, setBufferIndex] = useState(0);
+  const { t } = useLang();
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem("theme") || "dark"; } catch { return "dark"; }
   });
@@ -246,7 +250,7 @@ export default function App() {
                 theme={theme}
                 onToggleTheme={toggleTheme}
               />
-              <Suspense fallback={<div className="loading-spinner"><p>Cargando...</p></div>}>
+              <Suspense fallback={<div className="loading-spinner"><p>{t("app.loading")}</p></div>}>
                 {screen === "home" && <Home onStart={start} />}
                 {screen === "game" && (
                   <GameChooser
@@ -267,6 +271,7 @@ export default function App() {
                   />
                 )}
                 {screen === "history" && <History onNavigate={navigateTo} />}
+                {screen === "tierlist" && <TierList />}
               </Suspense>
             </>
           )}
