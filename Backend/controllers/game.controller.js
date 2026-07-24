@@ -1,16 +1,11 @@
 import axios from "axios";
-import GameDAO from "../repo/gameDAO.js";
+import gameDAO from "../repo/gameDAO.js";
 import { escapeRegex } from '../utils/security.js';
 import logger from '../utils/logger.js';
 
-const gameDAO = new GameDAO();
-
 const isValidId = (id) => id && typeof id === 'string' && id.length > 0;
 
-const toJSON = (doc) => {
-  if (!doc) return doc;
-  return doc;
-};
+const toJSON = (doc) => doc;
 
 export const createGame = async (req, res) => {
   try {
