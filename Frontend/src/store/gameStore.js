@@ -1,7 +1,10 @@
 // src/store/gameStore.js
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-export const useGameStore = create((set, get) => ({
+export const useGameStore = create(
+  persist(
+    (set, get) => ({
   // Estado de juegos
   MAX_CHOICES: 25, // Definimos el número máximo de elecciones aquí
   
@@ -73,4 +76,18 @@ export const useGameStore = create((set, get) => ({
     ranking.sort((a, b) => b.count - a.count);
     return ranking;
   }
-}));
+}),
+  {
+    name: 'game-storage',
+    partialize: (state) => ({
+      games: state.games,
+      champion: state.champion,
+      left: state.left,
+      right: state.right,
+      bufferIndex: state.bufferIndex,
+      isFinished: state.isFinished,
+      choiceCount: state.choiceCount,
+      votesMap: state.votesMap,
+    }),
+  })
+);

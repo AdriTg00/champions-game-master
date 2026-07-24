@@ -2,9 +2,8 @@ import bcrypt from "bcryptjs";
 import { generateToken } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
 import userDAO from '../repo/userDAO.js';
-import { config } from '../utils/config.js';
 
-const saltRounds = config.isVercel ? 12 : 4;
+const saltRounds = 12;
 
 export const createUser = async (req, res) => {
   try {
