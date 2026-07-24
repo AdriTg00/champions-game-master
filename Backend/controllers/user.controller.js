@@ -34,8 +34,8 @@ export const createUser = async (req, res) => {
       user: { id: user.id, username: user.username, email: user.email }
     });
   } catch (error) {
-    logger.error('Error en createUser:', { message: error.message, stack: error.stack?.split('\n').slice(0, 3).join('|') });
-    res.status(500).json({ error: "Error al crear usuario", details: error.message });
+    logger.error('Error en createUser:', { message: error.message });
+    res.status(500).json({ error: "Error al crear usuario" });
   }
 };
 
