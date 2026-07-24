@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
 
 app.use(async (req, res, next) => {
   try {
-    await connectDB(config.mongoUri);
+    await connectDB();
   } catch {
     return res.status(503).json({ error: 'Base de datos no disponible' });
   }
@@ -65,7 +65,7 @@ if (!config.isVercel) {
 
   const start = async () => {
     try {
-      await connectDB(config.mongoUri);
+      await connectDB();
       server = app.listen(config.port, () => {
         logger.info(`Servidor corriendo en http://localhost:${config.port}`);
         logger.info(`API disponible en http://localhost:${config.port}/api`);

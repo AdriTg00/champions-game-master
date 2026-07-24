@@ -82,7 +82,6 @@
   background: color-mix(in oklab, var(--card) 80%, transparent);
   padding: 1.5rem;
   box-shadow: var(--shadow-elegant);
-  backdrop-filter: blur(12px);
 }
 
 .auth-form > * + * {

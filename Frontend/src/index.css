@@ -72,6 +72,13 @@ html, body {
   user-select: none;
 }
 
+input,
+textarea,
+[contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .glass {
   background-color: color-mix(in oklab, var(--background) 70%, transparent);
   backdrop-filter: blur(12px);
@@ -91,13 +98,6 @@ html, body {
 @keyframes ambient-drift-alt {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
   50% { transform: translate3d(-6%, 5%, 0) scale(1.1); }
-}
-
-input,
-textarea,
-[contenteditable] {
-  -webkit-user-select: text;
-  user-select: text;
 }
 
 @media (max-width: 768px) {

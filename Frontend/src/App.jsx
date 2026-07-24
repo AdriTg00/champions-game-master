@@ -1,14 +1,13 @@
-import { useEffect, useState, Suspense, lazy, useCallback } from "react";
+import { useEffect, useState, Suspense, lazy, useCallback, memo } from "react";
 import { useAuthStore } from "./store/authStore";
 import { useGameStore } from "./store/gameStore";
-import ErrorBoundary from "./components/ErrorBoundary";
 import { shuffleArray } from "./utils/shuffle";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 const Home = lazy(() => import("./pages/Home"));
 const GameChooser = lazy(() => import("./pages/GameChooser"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const History = lazy(() => import("./pages/History"));
-const Login = lazy(() => import("./pages/Login"));
-const Register = lazy(() => import("./pages/Register"));
 
 import AmbientBackground from "./components/AmbientBackground";
 import Navbar from "./components/Navbar";
@@ -28,6 +27,9 @@ import client from "./api/client";
 
 const MAX_RANDOM_GAMES = 200;
 const MAX_CHOICES = 25;
+
+const MemoLogin = memo(Login);
+const MemoRegister = memo(Register);
 
 function startGame(games, mockGames, shuffleArray, setters) {
   const source = games && games.length ? games : mockGames;
@@ -64,6 +66,8 @@ export default function App() {
 
   const [authScreen, setAuthScreen] = useState("login");
   const [screen, setScreen] = useState("home");
+  const goRegister = useCallback(() => setAuthScreen("register"), []);
+  const goLogin = useCallback(() => setAuthScreen("login"), []);
   const [bufferIndex, setBufferIndex] = useState(0);
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem("theme") || "dark"; } catch { return "dark"; }
@@ -214,32 +218,19 @@ export default function App() {
     }
   }, [handleLogout]);
 
-  if (loading) {
-    return (
-      <ErrorBoundary>
-        <AmbientBackground />
-        <div className="loading-spinner">
-          <p>Cargando...</p>
-        </div>
-      </ErrorBoundary>
-    );
-  }
-
   return (
-    <ErrorBoundary>
+    <>
       <AmbientBackground />
       <div className="app-shell">
         <div className="app-frame">
           {authScreen !== "app" && (
             <div className="auth-root">
-              <Suspense fallback={<div className="loading-spinner"><p>Cargando...</p></div>}>
-                {authScreen === "login" && (
-                  <Login onLogin={handleLogin} goRegister={() => setAuthScreen("register")} />
-                )}
-                {authScreen === "register" && (
-                  <Register onRegister={handleRegister} goLogin={() => setAuthScreen("login")} />
-                )}
-              </Suspense>
+              {authScreen === "login" && (
+                <MemoLogin onLogin={handleLogin} goRegister={goRegister} />
+              )}
+              {authScreen === "register" && (
+                <MemoRegister onRegister={handleRegister} goLogin={goLogin} />
+              )}
             </div>
           )}
 
@@ -277,6 +268,6 @@ export default function App() {
           )}
         </div>
       </div>
-    </ErrorBoundary>
+    </>
   );
 }

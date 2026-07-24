@@ -1,93 +1,78 @@
-import UserModel from '../models/User.js';
+import bcrypt from 'bcryptjs';
 
 class UserDAO {
+  constructor() {
+    this.users = [];
+  }
+
   async create(userData) {
-    try {
-      const user = new UserModel(userData);
-      const saved = await user.save();
-      return saved;
-    } catch (error) {
-      if (error.code === 11000) {
-        throw new Error('Username o email ya existe');
-      }
-      throw new Error('Error creando usuario: ' + error.message);
-    }
+    const existingUsername = this.users.find(u => u.username === userData.username);
+    if (existingUsername) throw new Error('Username o email ya existe');
+
+    const existingEmail = this.users.find(u => u.email === userData.email);
+    if (existingEmail) throw new Error('Username o email ya existe');
+
+    const user = {
+      id: String(Date.now() + Math.random()),
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.users.push(user);
+    return user;
   }
 
   async findById(id) {
-    const user = await UserModel.findById(id);
-    return user;
+    return this.users.find(u => u.id === id) || null;
   }
 
   async findByEmail(email) {
-    const user = await UserModel.findOne({ email });
-    return user;
+    return this.users.find(u => u.email === email) || null;
   }
 
   async findByUsername(username) {
-    const user = await UserModel.findOne({ username });
-    return user;
+    return this.users.find(u => u.username === username) || null;
   }
 
   async findAll({ limit = 50, page = 1 } = {}) {
     const skip = (page - 1) * limit;
-    const users = await UserModel.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    return users;
+    return this.users.slice(skip, skip + limit);
   }
 
   async update(id, userData) {
-    try {
-      const updated = await UserModel.findByIdAndUpdate(
-        id,
-        { ...userData },
-        { new: true, runValidators: true }
-      );
-      if (!updated) {
-        throw new Error('Usuario no encontrado');
-      }
-      return updated;
-    } catch (error) {
-      if (error.code === 11000) {
-        throw new Error('Username o email ya existe');
-      }
-      throw new Error('Error actualizando usuario: ' + error.message);
-    }
-  }
+    const idx = this.users.findIndex(u => u.id === id);
+    if (idx === -1) throw new Error('Usuario no encontrado');
 
-  async updatePartial(id, fields) {
-    try {
-      const updated = await UserModel.findByIdAndUpdate(
-        id,
-        { $set: fields },
-        { new: true, runValidators: true }
-      );
-      if (!updated) {
-        throw new Error('Usuario no encontrado');
-      }
-      return updated;
-    } catch (error) {
-      if (error.code === 11000) {
-        throw new Error('Username o email ya existe');
-      }
-      throw new Error('Error actualizando usuario: ' + error.message);
+    if (userData.username) {
+      const existing = this.users.find(u => u.username === userData.username && u.id !== id);
+      if (existing) throw new Error('Username o email ya existe');
     }
+    if (userData.email) {
+      const existing = this.users.find(u => u.email === userData.email && u.id !== id);
+      if (existing) throw new Error('Username o email ya existe');
+    }
+
+    this.users[idx] = { ...this.users[idx], ...userData, updatedAt: new Date().toISOString() };
+    return this.users[idx];
   }
 
   async delete(id) {
-    const deleted = await UserModel.findByIdAndDelete(id);
+    const idx = this.users.findIndex(u => u.id === id);
+    if (idx === -1) return null;
+    const deleted = this.users[idx];
+    this.users.splice(idx, 1);
     return deleted;
   }
 
   async exists(id) {
-    const exists = await UserModel.exists({ _id: id });
-    return !!exists;
+    return this.users.some(u => u.id === id);
   }
 
   async count() {
-    return await UserModel.countDocuments();
+    return this.users.length;
   }
 }
 

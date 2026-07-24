@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Swords, ArrowRight } from "lucide-react";
 import client from "../api/client";
 import "./Login.css";
@@ -48,12 +47,7 @@ export default function Login({ onLogin, goRegister }) {
       <div className="auth-grid-bg" />
       <div className="auth-gradient" />
       <div className="auth-container">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="auth-card-new"
-        >
+        <div className="auth-card-new">
           <div className="auth-card-header">
             <div className="auth-icon">
               <Swords size={20} />
@@ -105,7 +99,7 @@ export default function Login({ onLogin, goRegister }) {
               Create an account
             </button>
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

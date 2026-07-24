@@ -1,7 +1,27 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Swords, ArrowRight, Check, X } from "lucide-react";
 import client from "../api/client";
+
+function Field({ label, hint, children }) {
+  return (
+    <div className="auth-field">
+      <div className="auth-field-label-row">
+        <label className="auth-label">{label}</label>
+        {hint === "ok" && (
+          <span className="auth-hint-ok">
+            <Check size={12} /> looks good
+          </span>
+        )}
+        {hint === "bad" && (
+          <span className="auth-hint-bad">
+            <X size={12} /> check this
+          </span>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export default function Register({ onRegister, goLogin }) {
   const [form, setForm] = useState({ username: "", email: "", password: "", confirm: "" });
@@ -70,38 +90,12 @@ export default function Register({ onRegister, goLogin }) {
     }
   }
 
-  function Field({ label, hint, children }) {
-    return (
-      <div className="auth-field">
-        <div className="auth-field-label-row">
-          <label className="auth-label">{label}</label>
-          {hint === "ok" && (
-            <span className="auth-hint-ok">
-              <Check size={12} /> looks good
-            </span>
-          )}
-          {hint === "bad" && (
-            <span className="auth-hint-bad">
-              <X size={12} /> check this
-            </span>
-          )}
-        </div>
-        {children}
-      </div>
-    );
-  }
-
   return (
     <div className="auth-root-new">
       <div className="auth-grid-bg" />
       <div className="auth-gradient" />
       <div className="auth-container">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="auth-card-new"
-        >
+        <div className="auth-card-new">
           <div className="auth-card-header">
             <div className="auth-icon">
               <Swords size={20} />
@@ -177,7 +171,7 @@ export default function Register({ onRegister, goLogin }) {
               Sign in
             </button>
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
