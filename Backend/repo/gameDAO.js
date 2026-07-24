@@ -1,4 +1,3 @@
-// repo/gameDAO.js
 import mongoose from "mongoose";
 import Game from "../models/Game.js";
 
@@ -53,7 +52,6 @@ export default class GameDAO {
     }
   }
 
-  // Buscar por externalId (más fiable para evitar duplicados)
   async findByExternalId(externalId) {
     try {
       if (!externalId) return null;
@@ -81,7 +79,6 @@ export default class GameDAO {
     }
   }
 
-  // Devuelve 1 juego aleatorio que no esté marcado como picked (o null si no hay)
   async getRandomUnpicked() {
     try {
       const pipeline = [
@@ -95,7 +92,6 @@ export default class GameDAO {
     }
   }
 
-  // Marca un juego (por id) como picked = true
   async markPicked(id) {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) return null;
@@ -105,7 +101,6 @@ export default class GameDAO {
     }
   }
 
-  // Resetea todos los picked a false
   async resetAllPicked() {
     try {
       const res = await Game.updateMany({ picked: true }, { $set: { picked: false } });
