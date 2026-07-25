@@ -25,6 +25,7 @@ export default {
     contenderA: "Contender A",
     contenderB: "Contender B",
     choose: "Choose",
+    restart: "Restart ranking",
     loadingGame: "Loading game...",
     noTitle: "Untitled",
   },
@@ -41,6 +42,7 @@ export default {
     unknown: "Unknown",
     restart: "Restart ranking",
     save: "Save ranking",
+    saved: "Saved!",
     share: "Share",
   },
   history: {

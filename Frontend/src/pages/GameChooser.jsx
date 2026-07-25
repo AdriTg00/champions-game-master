@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { RotateCcw } from "lucide-react";
 import GameCard from "../components/GameCard";
 import { resolveImg } from "../utils/resolveImg";
 import { useLang } from "../i18n/useTranslations";
@@ -12,6 +13,7 @@ export default function GameChooser({
   choiceCount,
   MAX_CHOICES,
   chooseGame,
+  onRestart,
 }) {
   const { t } = useLang();
   const hasChampion = !!champion;
@@ -32,6 +34,7 @@ export default function GameChooser({
         choiceCount={choiceCount}
         MAX_CHOICES={MAX_CHOICES}
         chooseGame={chooseGame}
+        onRestart={onRestart}
       />
     );
   }
@@ -43,11 +46,12 @@ export default function GameChooser({
       choiceCount={choiceCount}
       MAX_CHOICES={MAX_CHOICES}
       chooseGame={chooseGame}
+      onRestart={onRestart}
     />
   );
 }
 
-function ProgressBlock({ round, total }) {
+function ProgressBlock({ round, total, onRestart }) {
   const { t } = useLang();
   const pct = total > 0 ? Math.round((round / total) * 100) : 0;
   return (
@@ -75,6 +79,11 @@ function ProgressBlock({ round, total }) {
         </div>
         <span className="progress-pct">{pct}%</span>
       </div>
+      {onRestart && (
+        <button className="progress-restart-btn" onClick={onRestart}>
+          <RotateCcw size={14} /> {t("game.restart")}
+        </button>
+      )}
     </motion.div>
   );
 }
@@ -125,7 +134,7 @@ function SlotSide({ side, game, losing, locked, onChoose, showImage }) {
   );
 }
 
-function InitialMode({ left, right, choiceCount, MAX_CHOICES, chooseGame }) {
+function InitialMode({ left, right, choiceCount, MAX_CHOICES, chooseGame, onRestart }) {
   const { t } = useLang();
   if (!left || !right) {
     return (
@@ -137,7 +146,7 @@ function InitialMode({ left, right, choiceCount, MAX_CHOICES, chooseGame }) {
 
   return (
     <div className="chooser-root">
-      <ProgressBlock round={choiceCount} total={MAX_CHOICES} />
+      <ProgressBlock round={choiceCount} total={MAX_CHOICES} onRestart={onRestart} />
       <div className="chooser-cards">
         <SlotSide side="left" game={left} onChoose={() => chooseGame(left)} showImage={true} />
         <VS />
@@ -147,14 +156,14 @@ function InitialMode({ left, right, choiceCount, MAX_CHOICES, chooseGame }) {
   );
 }
 
-function ChampionMode({ champion, opponent, choiceCount, MAX_CHOICES, chooseGame }) {
+function ChampionMode({ champion, opponent, choiceCount, MAX_CHOICES, chooseGame, onRestart }) {
   const { t } = useLang();
   const champImg = resolveImg(champion);
   const champName = champion.title ?? champion.name ?? "";
 
   return (
     <div className="chooser-root">
-      <ProgressBlock round={choiceCount} total={MAX_CHOICES} />
+      <ProgressBlock round={choiceCount} total={MAX_CHOICES} onRestart={onRestart} />
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}

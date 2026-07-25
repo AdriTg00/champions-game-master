@@ -32,7 +32,7 @@ import { mockGames } from "./mock/games";
 import client from "./api/client";
 
 const MAX_RANDOM_GAMES = 200;
-const MAX_CHOICES = 25;
+const MAX_CHOICES = 30;
 
 const MemoLogin = memo(Login);
 const MemoRegister = memo(Register);
@@ -126,7 +126,7 @@ export default function App() {
 
     const loadGames = async () => {
       try {
-        const response = await client.get("/api/games?limit=400");
+        const response = await client.get("/api/games", { params: { limit: 400, minMetacritic: 75 } });
         const list = Array.isArray(response.data)
           ? response.data
           : response.data.games ?? [];
@@ -274,6 +274,7 @@ export default function App() {
                     choiceCount={choiceCount}
                     MAX_CHOICES={MAX_CHOICES}
                     chooseGame={chooseGame}
+                    onRestart={restart}
                   />
                 )}
                 {screen === "ranking" && (

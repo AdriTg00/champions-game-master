@@ -41,7 +41,7 @@ export const searchRawg = async (req, res) => {
 
     let url = `https://api.rawg.io/api/games?key=${config.rawgApiKey}&page=${page}&page_size=${pageSize}`;
     if (query.trim()) {
-      url += `&search=${encodeURIComponent(query.trim())}&search_exact=true`;
+      url += `&search=${encodeURIComponent(query.trim())}&search_precise=false`;
     } else {
       url += `&ordering=-added`;
     }
@@ -77,11 +77,19 @@ export const getAllGames = async (req, res) => {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 50, 1000);
     const name = req.query.name;
+    const minMetacritic = parseInt(req.query.minMetacritic);
+    const maxMetacritic = parseInt(req.query.maxMetacritic);
     const filter = {};
 
     if (name) {
       const sanitizedName = escapeRegex(name.toString().trim());
       filter.name = { $regex: sanitizedName, $options: "i" };
+    }
+
+    if (!isNaN(minMetacritic) || !isNaN(maxMetacritic)) {
+      filter.metacritic = {};
+      if (!isNaN(minMetacritic)) filter.metacritic.$gte = minMetacritic;
+      if (!isNaN(maxMetacritic)) filter.metacritic.$lte = maxMetacritic;
     }
 
     const { data, total } = await gameDAO.findAll({ filter, page, limit, sort: { createdAt: -1 }});

@@ -400,6 +400,27 @@
   color: var(--muted-foreground);
 }
 
+.progress-restart-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.progress-restart-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* ====== RANKING ====== */
 .ranking-page {
   width: 100%;
@@ -609,7 +630,7 @@
   color: var(--muted-foreground);
 }
 
-/* ====== SCREEN HEADER (minimal) ====== */
+/* ====== MOBILE ====== */
 @media (max-width: 768px) {
   .chooser-cards {
     grid-template-columns: 1fr;
@@ -617,5 +638,91 @@
 
   .slot-side {
     min-height: auto;
+  }
+
+  .chooser-root {
+    padding: 1rem 0.75rem;
+  }
+
+  .game-card-new {
+    max-width: 100%;
+  }
+
+  .game-card-body {
+    padding: 1rem;
+  }
+
+  .ranking-page {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .ranking-table-wrap {
+    margin: 0 -0.25rem;
+    border-radius: 0.75rem;
+  }
+
+  .ranking-table-header,
+  .ranking-row {
+    grid-template-columns: 40px 56px 1fr 56px;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .ranking-cover-cell {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ranking-game-name {
+    font-size: 0.8rem;
+  }
+
+  .ranking-actions {
+    flex-direction: column;
+  }
+
+  .ranking-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-title {
+    font-size: 1.75rem;
+  }
+
+  .home-root {
+    padding: 1rem;
+    min-height: calc(100vh - 64px - 64px);
+  }
+
+  .progress-block {
+    padding: 0.875rem;
+  }
+
+  .progress-value {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .ranking-table-header,
+  .ranking-row {
+    grid-template-columns: 32px 40px 1fr 40px;
+    gap: 0.375rem;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .ranking-cover-cell {
+    width: 32px;
+    height: 32px;
+  }
+
+  .ranking-game-name {
+    font-size: 0.75rem;
+  }
+
+  .ranking-score-cell {
+    font-size: 0.8rem;
   }
 }

@@ -133,3 +133,63 @@
   font-size: 0.75rem;
   font-weight: 500;
 }
+
+/* --- Mobile bottom nav --- */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 64px;
+  background: color-mix(in oklab, var(--card) 85%, transparent);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .mobile-bottom-nav {
+    display: none;
+  }
+}
+
+.mobile-bottom-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.375rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.6rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+  min-width: 0;
+}
+
+.mobile-bottom-link span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.mobile-bottom-link-active {
+  color: var(--foreground);
+}
+
+/* Add bottom padding to main content so it doesn't hide behind nav */
+.app-shell {
+  padding-bottom: 64px;
+}
+
+@media (min-width: 640px) {
+  .app-shell {
+    padding-bottom: 0;
+  }
+}

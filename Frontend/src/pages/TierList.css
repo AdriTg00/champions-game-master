@@ -455,6 +455,51 @@
   text-align: center;
 }
 
+/* --- Mobile adjustments --- */
+@media (max-width: 640px) {
+  .tierlist-root {
+    padding: 0.75rem 0.5rem;
+    gap: 1rem;
+  }
+
+  .tierlist-browser {
+    max-width: 100%;
+  }
+
+  .tierlist-browser-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .tier-game-card {
+    width: 60px;
+  }
+
+  .tier-game-label {
+    font-size: 0.55rem;
+  }
+
+  .tier-label {
+    width: 36px;
+    font-size: 1rem;
+    min-height: 56px;
+  }
+
+  .tier-games {
+    padding: 4px;
+    gap: 3px;
+  }
+
+  .tierlist-shared-root {
+    padding: 1rem 0.5rem;
+  }
+
+  .tierlist-shared-back {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+}
+
 @keyframes tierlist-spin {
   to { transform: rotate(360deg); }
 }

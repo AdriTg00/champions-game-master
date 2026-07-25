@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Medal, RotateCcw, Save, Share2 } from "lucide-react";
+import { Trophy, Medal, RotateCcw, Save, Share2, Check } from "lucide-react";
 import GameCover from "../components/GameCover";
 import { resolveImg } from "../utils/resolveImg";
 import { saveHistoryEntry } from "../store/historyStore";
@@ -22,8 +23,7 @@ const GAME_COLORS = {
   "Persona 5 Royal": { color: "#2a0a1a", accent: "#e05a5a" },
 };
 
-function getGameColors(game) {
-  const name = game.title || game.name || "";
+function getGameColors(name) {
   if (GAME_COLORS[name]) return GAME_COLORS[name];
   const hash = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
   const hue = hash % 360;
@@ -33,8 +33,22 @@ function getGameColors(game) {
   };
 }
 
+function encodeRankingData(ranking) {
+  const compact = ranking.map((g) => [
+    g.title || g.name || "",
+    g.thumbnail || g.background_image || "",
+    g.count || 0,
+  ]);
+  try {
+    return encodeURIComponent(JSON.stringify({ v: 1, g: compact }));
+  } catch {
+    return null;
+  }
+}
+
 export default function Ranking({ ranking = [], onRestart, games }) {
   const { t } = useLang();
+  const [saved, setSaved] = useState(false);
 
   if (!Array.isArray(ranking) || ranking.length === 0) {
     return (
@@ -59,6 +73,19 @@ export default function Ranking({ ranking = [], onRestart, games }) {
       })),
     };
     saveHistoryEntry(entry);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleShare = () => {
+    const encoded = encodeRankingData(ranking);
+    if (!encoded) return;
+    const url = `${window.location.origin}${window.location.pathname}?ranking=${encoded}`;
+    if (navigator.share) {
+      navigator.share({ title: t("ranking.title"), url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).catch(() => {});
+    }
   };
 
   return (
@@ -95,9 +122,10 @@ export default function Ranking({ ranking = [], onRestart, games }) {
           <RotateCcw size={16} /> {t("ranking.restart")}
         </button>
         <button className="ranking-btn ranking-btn-primary" onClick={handleSave}>
-          <Save size={16} /> {t("ranking.save")}
+          {saved ? <Check size={16} /> : <Save size={16} />}
+          {saved ? t("ranking.saved") : t("ranking.save")}
         </button>
-        <button className="ranking-btn ranking-btn-outline" onClick={() => navigator.clipboard?.writeText?.(window.location.href)}>
+        <button className="ranking-btn ranking-btn-outline" onClick={handleShare}>
           <Share2 size={16} /> {t("ranking.share")}
         </button>
       </div>
@@ -106,11 +134,12 @@ export default function Ranking({ ranking = [], onRestart, games }) {
 }
 
 function RankRow({ index, entry }) {
-  const name = entry.title ?? entry.name ?? "Unknown";
+  const { t } = useLang();
+  const name = entry.title ?? entry.name ?? t("ranking.unknown");
   const score = entry.count ?? 0;
   const genres = Array.isArray(entry.genres) ? entry.genres : (entry.genre ? [entry.genre] : []);
   const year = entry.year || "";
-  const colors = getGameColors(entry);
+  const colors = getGameColors(name);
   const imgUrl = resolveImg(entry);
 
   const medalColor = index === 0 ? "var(--gold)" : index === 1 ? "var(--silver)" : index === 2 ? "var(--bronze)" : "";

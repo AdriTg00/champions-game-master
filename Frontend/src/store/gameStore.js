@@ -6,7 +6,7 @@ export const useGameStore = create(
   persist(
     (set, get) => ({
   // Estado de juegos
-  MAX_CHOICES: 25, // Definimos el número máximo de elecciones aquí
+  MAX_CHOICES: 30, // Definimos el número máximo de elecciones aquí
   
   games: [],
   champion: null,
