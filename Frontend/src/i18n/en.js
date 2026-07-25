@@ -111,6 +111,7 @@ export default {
     searchPlaceholder: "Search games...",
     loadMore: "Load more",
     noResults: "No games found",
+    searchError: "Search failed, try again",
     remove: "Remove from tier",
     share: "Share tier list",
     shareCopied: "Link copied to clipboard!",

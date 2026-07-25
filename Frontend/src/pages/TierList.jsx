@@ -135,29 +135,31 @@ export default function TierList() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [dragOverTier, setDragOverTier] = useState(null);
   const dragGameRef = useRef(null);
-  const abortRef = useRef(null);
+  const queryRef = useRef("");
   const debounceRef = useRef(null);
 
   const fetchGames = useCallback(async (q, p) => {
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
+    queryRef.current = q;
+    setError(null);
 
-    setLoading(true);
+    const controller = new AbortController();
     try {
+      setLoading(true);
       const params = { page_size: 20, page: p };
       if (q.trim()) params.name = q.trim();
       const res = await client.get("/api/games/rawg/search", { params, signal: controller.signal });
+      if (queryRef.current !== q) return;
       const list = res.data.games || [];
       if (p === 1) setGames(list);
       else setGames((prev) => [...prev, ...list]);
       setHasMore(list.length === 20);
     } catch (err) {
       if (err?.name !== "CanceledError" && err?.code !== "ERR_CANCELED") {
-        if (p === 1) setGames([]);
+        setError(true);
       }
     } finally {
       setLoading(false);
@@ -165,6 +167,7 @@ export default function TierList() {
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);
@@ -349,7 +352,10 @@ export default function TierList() {
               />
             );
           })}
-          {!loading && games.length === 0 && (
+          {error && (
+            <p className="tierlist-no-results">{t("tierlist.searchError")}</p>
+          )}
+          {!loading && !error && games.length === 0 && (
             <p className="tierlist-no-results">{t("tierlist.noResults")}</p>
           )}
           {loading && (
