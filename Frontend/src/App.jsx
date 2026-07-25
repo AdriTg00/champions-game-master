@@ -10,12 +10,6 @@ const GameChooser = lazy(() => import("./pages/GameChooser"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const History = lazy(() => import("./pages/History"));
 const TierList = lazy(() => import("./pages/TierList"));
-const SharedTierView = lazy(() =>
-  import("./pages/TierList").then((m) => ({ default: m.SharedTierView }))
-);
-const SharedRankingView = lazy(() =>
-  import("./pages/Ranking").then((m) => ({ default: m.SharedRankingView }))
-);
 
 import AmbientBackground from "./components/AmbientBackground";
 import Navbar from "./components/Navbar";
@@ -53,9 +47,6 @@ function startGame(games, mockGames, shuffleArray, setters) {
 }
 
 export default function App() {
-  const [sharedTier] = useState(() => new URLSearchParams(window.location.search).get("tier"));
-  const [sharedRanking] = useState(() => new URLSearchParams(window.location.search).get("ranking"));
-
   const { user, token, setUser, logout } = useAuthStore();
   const gameStore = useGameStore();
   const {
@@ -240,22 +231,6 @@ export default function App() {
       setScreen(target);
     }
   }, [handleLogout, choiceCount, left, right, champion, games, setGames, reset, setChampion, setLeft, setRight, setChoiceCount]);
-
-  if (sharedTier) {
-    return (
-      <Suspense fallback={<div className="loading-spinner"><p>{t("app.loading")}</p></div>}>
-        <SharedTierView data={sharedTier} onBack={() => window.history.replaceState({}, "", window.location.pathname) || window.location.reload()} />
-      </Suspense>
-    );
-  }
-
-  if (sharedRanking) {
-    return (
-      <Suspense fallback={<div className="loading-spinner"><p>{t("app.loading")}</p></div>}>
-        <SharedRankingView data={sharedRanking} onBack={() => window.history.replaceState({}, "", window.location.pathname) || window.location.reload()} />
-      </Suspense>
-    );
-  }
 
   return (
     <>

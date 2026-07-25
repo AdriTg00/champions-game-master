@@ -265,7 +265,7 @@ export default function TierList() {
   const handleShare = () => {
     const encoded = encodeShareData(tiers);
     if (!encoded) return;
-    const url = `${window.location.origin}${window.location.pathname}?tier=${encoded}`;
+    const url = `${window.location.origin}/shared-tier.html?data=${encoded}`;
     if (navigator.share) {
       navigator.share({ title: t("tierlist.sharedTitle"), url }).catch(() => {});
     } else {

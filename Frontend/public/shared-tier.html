@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shared Tier List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --background: oklch(0.14 0.01 260);
+      --foreground: oklch(0.97 0.005 250);
+      --card: oklch(0.18 0.012 260);
+      --card-foreground: oklch(0.97 0.005 250);
+      --muted: oklch(0.22 0.014 260);
+      --muted-foreground: oklch(0.66 0.02 260);
+      --accent: oklch(0.24 0.016 260);
+      --accent-foreground: oklch(0.97 0.005 250);
+      --border: oklch(1 0 0 / 8%);
+      --input: oklch(1 0 0 / 10%);
+      --ring: oklch(0.7 0.02 260);
+      --gold: oklch(0.85 0.17 85);
+      --silver: oklch(0.85 0.01 260);
+      --bronze: oklch(0.72 0.14 55);
+      --shadow-elegant: 0 1px 2px 0 color-mix(in oklab, var(--foreground) 5%, transparent), 0 12px 40px -12px color-mix(in oklab, var(--foreground) 12%, transparent);
+      --tier-s-bg: #e04040;
+      --tier-s-text: #fff;
+      --tier-a-bg: #e08040;
+      --tier-a-text: #fff;
+      --tier-b-bg: #d4a040;
+      --tier-b-text: #000;
+      --tier-c-bg: #4080d0;
+      --tier-c-text: #fff;
+      --tier-d-bg: #7080a0;
+      --tier-d-text: #fff;
+      --tier-e-bg: #505868;
+      --tier-e-text: #fff;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; border-color: var(--border); }
+    html, body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: "Pixelify Sans", "VT323", monospace, ui-monospace, "Courier New", Courier, monospace;
+      -webkit-font-smoothing: none;
+      -moz-osx-font-smoothing: unset;
+      text-rendering: optimizeSpeed;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .tierlist-shared-root { max-width: 56rem; margin: 0 auto; padding: 2rem 1rem; }
+    .tierlist-shared-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .tierlist-shared-header h2 { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--foreground); }
+    .tierlist-shared-back {
+      display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem; border: 1px solid var(--border); background: var(--card);
+      color: var(--muted-foreground); font-size: 0.85rem; font-family: inherit; cursor: pointer; transition: 0.2s;
+    }
+    .tierlist-shared-back:hover { border-color: var(--accent); color: var(--accent); }
+    .tierlist-shared-error { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 4rem 2rem; color: var(--muted-foreground); text-align: center; }
+    .tierlist-rows { display: flex; flex-direction: column; gap: 4px; border-radius: 1rem; border: 1px solid var(--border); background: var(--card); overflow: hidden; }
+    .tier-row { display: flex; align-items: stretch; gap: 0; min-height: 64px; }
+    .tier-row + .tier-row { border-top: 1px solid var(--border); }
+    .tier-label {
+      display: flex; align-items: center; justify-content: center; width: 48px; min-height: 64px;
+      font-size: 1.25rem; font-weight: 900; flex-shrink: 0;
+    }
+    .tier-games { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px; min-height: 64px; }
+    .tier-empty { font-size: 0.8rem; color: var(--muted-foreground); opacity: 0.5; }
+    .tier-game-card { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 72px; flex-shrink: 0; padding: 2px; border-radius: 8px; border: 2px solid transparent; }
+    .tier-game-img-wrap { width: 100%; aspect-ratio: 3 / 2; border-radius: 4px; overflow: hidden; }
+    .tier-game-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .tier-game-label {
+      font-size: 0.6rem; line-height: 1.15; text-align: center; color: var(--foreground);
+      overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; max-width: 100%; word-break: break-word; width: 100%;
+    }
+    @media (max-width: 640px) {
+      .tierlist-shared-root { padding: 1rem 0.5rem; }
+      .tier-list-shared-back { font-size: 0.75rem; padding: 0.3rem 0.5rem; }
+      .tier-game-card { width: 60px; }
+      .tier-game-label { font-size: 0.55rem; }
+      .tier-label { width: 36px; font-size: 1rem; min-height: 56px; }
+      .tier-games { padding: 4px; gap: 3px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="tierlist-shared-error">
+      <p>Loading...</p>
+    </div>
+  </div>
+  <script>
+    const TIERS = ["S", "A", "B", "C", "D", "E"];
+    const TIER_COLORS = {
+      S: { bg: "var(--tier-s-bg)", text: "var(--tier-s-text)" },
+      A: { bg: "var(--tier-a-bg)", text: "var(--tier-a-text)" },
+      B: { bg: "var(--tier-b-bg)", text: "var(--tier-b-text)" },
+      C: { bg: "var(--tier-c-bg)", text: "var(--tier-c-text)" },
+      D: { bg: "var(--tier-d-bg)", text: "var(--tier-d-text)" },
+      E: { bg: "var(--tier-e-bg)", text: "var(--tier-e-text)" },
+    };
+    const GAME_COLORS = {
+      "Elden Ring": { color: "#3a2f1a", accent: "#d4a24a" },
+      "The Legend of Zelda: Breath of the Wild": { color: "#123a2a", accent: "#7fd4a6" },
+      "Red Dead Redemption 2": { color: "#3a1414", accent: "#e07a56" },
+      "The Witcher 3: Wild Hunt": { color: "#1f1a12", accent: "#c8a878" },
+      "Baldur's Gate 3": { color: "#241226", accent: "#c68ad6" },
+    };
+    function getGameColors(name) {
+      if (GAME_COLORS[name]) return GAME_COLORS[name];
+      const hash = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      const hue = hash % 360;
+      return { color: `oklch(0.2 0.04 ${hue})`, accent: `oklch(0.7 0.15 ${hue})` };
+    }
+    function decodeShareData(raw) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(raw));
+        if (parsed.v !== 1 || !parsed.t) return null;
+        const tiers = {};
+        for (const key of TIERS) {
+          tiers[key] = (parsed.t[key] || []).map(function (g) { return { name: g[0], thumbnail: g[1] }; });
+        }
+        return tiers;
+      } catch (e) {
+        return null;
+      }
+    }
+    function renderGameCard(game) {
+      var name = game.name || game.title || "";
+      var thumb = game.thumbnail || game.background_image || "";
+      var colors = getGameColors(name || "?");
+      var imgHtml = thumb
+        ? '<img src="' + thumb.replace(/"/g, "&quot;") + '" alt="' + name.replace(/"/g, "&quot;") + '" class="tier-game-img" referrerpolicy="no-referrer" />'
+        : '<div class="tier-game-img" style="background:' + colors.color + ';display:flex;align-items:center;justify-content:center;color:' + colors.accent + ';font-size:1.5rem;font-weight:700;">' + name.charAt(0).toUpperCase() + '</div>';
+      return '<div class="tier-game-card"><div class="tier-game-img-wrap">' + imgHtml + '</div><span class="tier-game-label">' + name + '</span></div>';
+    }
+    function render(tiers) {
+      var html = '<div class="tierlist-shared-root"><div class="tierlist-shared-header"><a href="/" class="tierlist-shared-back">&#8592; Back to app</a><h2>Shared Tier List</h2></div><div class="tierlist-rows">';
+      for (var i = 0; i < TIERS.length; i++) {
+        var key = TIERS[i];
+        var games = tiers[key] || [];
+        var colors = TIER_COLORS[key];
+        html += '<div class="tier-row"><div class="tier-label" style="background-color:' + colors.bg + ';color:' + colors.text + '">' + key + '</div><div class="tier-games">';
+        if (games.length === 0) {
+          html += '<span class="tier-empty">Empty</span>';
+        } else {
+          for (var j = 0; j < games.length; j++) {
+            html += renderGameCard(games[j]);
+          }
+        }
+        html += '</div></div>';
+      }
+      html += '</div></div>';
+      return html;
+    }
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var raw = params.get("data");
+      var root = document.getElementById("root");
+      if (!raw) {
+        root.innerHTML = '<div class="tierlist-shared-error"><p>Invalid or corrupted tier list link.</p><a href="/" class="tierlist-shared-back">&#8592; Back to app</a></div>';
+        return;
+      }
+      var tiers = decodeShareData(raw);
+      if (!tiers) {
+        root.innerHTML = '<div class="tierlist-shared-error"><p>Invalid or corrupted tier list link.</p><a href="/" class="tierlist-shared-back">&#8592; Back to app</a></div>';
+        return;
+      }
+      root.innerHTML = render(tiers);
+    })();
+  </script>
+</body>
+</html>

@@ -163,7 +163,7 @@ export default function Ranking({ ranking = [], onRestart, games }) {
   const handleShare = () => {
     const encoded = encodeRankingData(ranking);
     if (!encoded) return;
-    const url = `${window.location.origin}${window.location.pathname}?ranking=${encoded}`;
+    const url = `${window.location.origin}/shared-ranking.html?data=${encoded}`;
     if (navigator.share) {
       navigator.share({ title: t("ranking.title"), url }).catch(() => {});
     } else {
