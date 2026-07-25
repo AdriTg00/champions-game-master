@@ -138,6 +138,7 @@ export default function TierList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dragOverTier, setDragOverTier] = useState(null);
+  const [selectedGame, setSelectedGame] = useState(null);
   const dragGameRef = useRef(null);
   const queryRef = useRef("");
   const debounceRef = useRef(null);
@@ -224,6 +225,17 @@ export default function TierList() {
     setTiers({ S: [], A: [], B: [], C: [], D: [], E: [] });
   };
 
+  const handleBrowserClick = (game) => {
+    if (inAnyTier(game)) return;
+    setSelectedGame((prev) => (prev && getGameId(prev) === getGameId(game) ? null : game));
+  };
+
+  const handleTierClick = (tierKey) => {
+    if (!selectedGame) return;
+    addToTier(selectedGame, tierKey);
+    setSelectedGame(null);
+  };
+
   const handleShare = () => {
     const encoded = encodeShareData(tiers);
     if (!encoded) return;
@@ -286,10 +298,11 @@ export default function TierList() {
           {TIERS.map((key) => (
             <div
               key={key}
-              className={`tier-row${dragOverTier === key ? " tier-row-dragover" : ""}`}
+              className={`tier-row${dragOverTier === key ? " tier-row-dragover" : ""}${selectedGame ? " tier-row-clickable" : ""}`}
               onDragOver={(e) => handleTierDragOver(e, key)}
               onDragLeave={handleTierDragLeave}
               onDrop={(e) => handleTierDrop(e, key)}
+              onClick={() => handleTierClick(key)}
             >
               <div
                 className="tier-label"
@@ -342,13 +355,16 @@ export default function TierList() {
         <div className="tierlist-browser-grid">
           {games.map((game) => {
             const assigned = inAnyTier(game);
+            const isSelected = selectedGame && getGameId(selectedGame) === getGameId(game);
             return (
               <BrowserCard
                 key={getGameId(game)}
                 game={game}
                 assigned={assigned}
+                selected={isSelected}
                 onDragStart={(e) => handleDragStart(e, game)}
                 onDragEnd={handleDragEnd}
+                onClick={() => handleBrowserClick(game)}
               />
             );
           })}
@@ -395,17 +411,24 @@ function TierGameCard({ game, onClick }) {
   );
 }
 
-function BrowserCard({ game, assigned, onDragStart, onDragEnd }) {
+function BrowserCard({ game, assigned, selected, onDragStart, onDragEnd, onClick }) {
   const name = game?.name || game?.title || "";
   const thumb = game?.thumbnail || game?.background_image || "";
   const colors = getGameColors(name || "?");
 
+  const cls = [
+    "browser-card",
+    assigned ? " browser-card-assigned" : "",
+    selected ? " browser-card-selected" : "",
+  ].join("");
+
   return (
     <div
-      className={`browser-card${assigned ? " browser-card-assigned" : ""}`}
+      className={cls}
       draggable={!assigned}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
+      onClick={onClick}
     >
       <div className="browser-card-img-wrap">
         {thumb ? (

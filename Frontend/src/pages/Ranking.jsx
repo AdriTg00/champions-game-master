@@ -46,6 +46,89 @@ function encodeRankingData(ranking) {
   }
 }
 
+function decodeRankingData(raw) {
+  try {
+    const parsed = JSON.parse(decodeURIComponent(raw));
+    if (parsed.v !== 1 || !Array.isArray(parsed.g)) return null;
+    return parsed.g.map(([name, thumb, count]) => ({
+      title: name,
+      thumbnail: thumb || "",
+      count: count || 0,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+export function SharedRankingView({ data, onBack }) {
+  const { t } = useLang();
+  const ranking = typeof data === "string" ? decodeRankingData(data) : data;
+  if (!ranking || ranking.length === 0) {
+    return (
+      <div className="ranking-empty">
+        <p>{t("ranking.shareInvalid")}</p>
+        {onBack && <button className="ranking-btn" onClick={onBack}>{t("ranking.goBack")}</button>}
+      </div>
+    );
+  }
+  return (
+    <div className="ranking-page">
+      <div className="ranking-header">
+        <div className="ranking-header-icon"><Trophy size={20} /></div>
+        <h1 className="ranking-page-title">{t("ranking.title")}</h1>
+        <p className="ranking-page-subtitle">{t("ranking.basedOn", { count: ranking.length })}</p>
+      </div>
+      <div className="ranking-table-wrap">
+        <div className="ranking-table-header">
+          <span>{t("ranking.hash")}</span>
+          <span>{t("ranking.cover")}</span>
+          <span>{t("ranking.game")}</span>
+          <span className="ranking-table-header-right">{t("ranking.votes")}</span>
+        </div>
+        {ranking.map((entry, i) => (
+          <SharedRankRow key={i} index={i} entry={entry} />
+        ))}
+      </div>
+      {onBack && (
+        <div className="ranking-actions">
+          <button className="ranking-btn ranking-btn-outline" onClick={onBack}>
+            {t("ranking.goBack")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SharedRankRow({ index, entry }) {
+  const name = entry.title || t("ranking.unknown");
+  const score = entry.count ?? 0;
+  const thumb = entry.thumbnail || "";
+  const colors = getGameColors(name);
+  const medalColor = index === 0 ? "var(--gold)" : index === 1 ? "var(--silver)" : index === 2 ? "var(--bronze)" : "";
+  const isPodium = index < 3;
+
+  return (
+    <div className={`ranking-row${isPodium ? " ranking-row-podium" : ""}`}>
+      <div className="ranking-rank">
+        {isPodium ? <Medal size={14} style={{ color: medalColor }} /> : <span className="ranking-rank-num muted">#</span>}
+        <span style={isPodium ? { color: medalColor } : {}}>{index + 1}</span>
+      </div>
+      <div className="ranking-cover-cell">
+        {thumb ? (
+          <img src={thumb} alt={name} className="ranking-cover-img" referrerPolicy="no-referrer" />
+        ) : (
+          <GameCover title={name} color={colors.color} accent={colors.accent} className="ranking-cover-img" />
+        )}
+      </div>
+      <div className="ranking-info-cell">
+        <p className="ranking-game-name">{name}</p>
+      </div>
+      <div className="ranking-score-cell">{score}</div>
+    </div>
+  );
+}
+
 export default function Ranking({ ranking = [], onRestart, games }) {
   const { t } = useLang();
   const [saved, setSaved] = useState(false);

@@ -44,6 +44,8 @@ export default {
     save: "Guardar ranking",
     saved: "¡Guardado!",
     share: "Compartir",
+    shareInvalid: "Enlace de ranking inválido o corrupto.",
+    goBack: "Volver a la app",
   },
   history: {
     title: "Historial de rankings",

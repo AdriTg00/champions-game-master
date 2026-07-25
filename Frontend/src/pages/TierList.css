@@ -101,6 +101,16 @@
   outline-offset: -2px;
 }
 
+.tier-row-clickable {
+  cursor: pointer;
+}
+
+.tier-row-clickable:hover {
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  outline: 2px dashed var(--foreground);
+  outline-offset: -2px;
+}
+
 .tier-row + .tier-row {
   border-top: 1px solid var(--border);
 }
@@ -331,6 +341,12 @@
 .browser-card-assigned {
   opacity: 0.35;
   pointer-events: none;
+}
+
+.browser-card-selected {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 2px var(--foreground), var(--shadow-glow);
+  background: color-mix(in oklab, var(--card) 70%, var(--foreground));
 }
 
 .browser-card-dragging {

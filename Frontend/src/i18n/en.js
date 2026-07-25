@@ -44,6 +44,8 @@ export default {
     save: "Save ranking",
     saved: "Saved!",
     share: "Share",
+    shareInvalid: "Invalid or corrupted ranking link.",
+    goBack: "Back to app",
   },
   history: {
     title: "Ranking history",
