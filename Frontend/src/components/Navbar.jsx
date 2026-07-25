@@ -1,4 +1,4 @@
-import { Swords, History, Trophy, LogOut, Languages, Layers } from "lucide-react";
+import { Swords, History, Trophy, LogOut, Languages, Layers, Library } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
 import { useLang } from "../i18n/useTranslations";
@@ -8,6 +8,7 @@ const navItems = [
   { key: "ranking", icon: Trophy, labelKey: "nav.ranking" },
   { key: "history", icon: History, labelKey: "nav.history" },
   { key: "tierlist", icon: Layers, labelKey: "nav.tierlist" },
+  { key: "library", icon: Library, labelKey: "nav.library" },
 ];
 
 export default function Navbar({ screen, onNavigate, theme, onToggleTheme }) {

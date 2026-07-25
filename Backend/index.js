@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import userRoutes from './routes/user.routes.js';
 import gameRoutes from './routes/game.routes.js';
+import libraryRoutes from './routes/library.routes.js';
 import { apiLimiter } from './middleware/rateLimit.js';
 import logger from './utils/logger.js';
 import { config } from './utils/config.js';
@@ -41,6 +42,7 @@ app.use(async (req, res, next) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/games', gameRoutes);
+app.use('/api/library', libraryRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: `Ruta no encontrada: ${req.method} ${req.path}` });

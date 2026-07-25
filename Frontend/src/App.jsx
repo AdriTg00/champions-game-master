@@ -10,6 +10,7 @@ const GameChooser = lazy(() => import("./pages/GameChooser"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const History = lazy(() => import("./pages/History"));
 const TierList = lazy(() => import("./pages/TierList"));
+const Library = lazy(() => import("./pages/Library"));
 
 import AmbientBackground from "./components/AmbientBackground";
 import Navbar from "./components/Navbar";
@@ -24,6 +25,7 @@ import "./pages/Login.css";
 import "./pages/Ranking.css";
 import "./pages/History.css";
 import "./pages/TierList.css";
+import "./pages/Library.css";
 
 import { mockGames } from "./mock/games";
 import client from "./api/client";
@@ -279,6 +281,7 @@ export default function App() {
                 )}
                 {screen === "history" && <History onNavigate={navigateTo} />}
                 {screen === "tierlist" && <TierList />}
+                {screen === "library" && <Library />}
               </Suspense>
             </>
           )}
