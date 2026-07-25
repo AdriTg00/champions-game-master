@@ -110,6 +110,11 @@ export default {
     loadMore: "Cargar más",
     noResults: "No se encontraron juegos",
     remove: "Quitar del tier",
+    share: "Compartir tier list",
+    shareCopied: "¡Enlace copiado al portapapeles!",
+    sharedTitle: "Tier List Compartida",
+    shareInvalid: "Enlace de tier list inválido o corrupto.",
+    goBack: "Volver a la app",
   },
   app: {
     loading: "Cargando...",

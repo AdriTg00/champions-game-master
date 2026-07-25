@@ -10,6 +10,9 @@ const GameChooser = lazy(() => import("./pages/GameChooser"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const History = lazy(() => import("./pages/History"));
 const TierList = lazy(() => import("./pages/TierList"));
+const SharedTierView = lazy(() =>
+  import("./pages/TierList").then((m) => ({ default: m.SharedTierView }))
+);
 
 import AmbientBackground from "./components/AmbientBackground";
 import Navbar from "./components/Navbar";
@@ -47,6 +50,8 @@ function startGame(games, mockGames, shuffleArray, setters) {
 }
 
 export default function App() {
+  const [sharedTier] = useState(() => new URLSearchParams(window.location.search).get("tier"));
+
   const { user, token, setUser, logout } = useAuthStore();
   const gameStore = useGameStore();
   const {
@@ -225,6 +230,14 @@ export default function App() {
       setScreen(target);
     }
   }, [handleLogout, choiceCount, restart]);
+
+  if (sharedTier) {
+    return (
+      <Suspense fallback={<div className="loading-spinner"><p>{t("app.loading")}</p></div>}>
+        <SharedTierView data={sharedTier} onBack={() => window.history.replaceState({}, "", window.location.pathname) || window.location.reload()} />
+      </Suspense>
+    );
+  }
 
   return (
     <>

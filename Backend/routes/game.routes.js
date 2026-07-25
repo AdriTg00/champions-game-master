@@ -3,6 +3,7 @@ import express from 'express';
 import {
   createGame,
   getAllGames,
+  searchRawg,
   getGameById,
   updateGame,
   deleteGame,
@@ -33,6 +34,7 @@ const router = express.Router();
 // POST y PUT requieren autenticación
 router.post('/', verifyToken, validateGameCreation, createGame);
 router.get('/', getAllGames);
+router.get('/rawg/search', searchRawg);
 
 router.get('/external/:id', verifyToken, validateNumericParam, fetchExternalGame);
 router.post('/import/:id', verifyToken, validateNumericParam, importExternalGame);

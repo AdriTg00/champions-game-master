@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, ChevronDown, X, Layers, RotateCcw, Loader2 } from "lucide-react";
+import { Search, ChevronDown, X, Layers, RotateCcw, Loader2, Share2, ArrowLeft } from "lucide-react";
 import client from "../api/client";
 import { useLang } from "../i18n/useTranslations";
 import GameCover from "../components/GameCover";
@@ -49,6 +49,85 @@ function getGameId(game) {
   return game._id || game.id;
 }
 
+function encodeShareData(tiers) {
+  const compact = {};
+  for (const key of TIERS) {
+    compact[key] = tiers[key].map((g) => [
+      g.name || g.title || "",
+      g.thumbnail || g.background_image || "",
+    ]);
+  }
+  try {
+    const json = JSON.stringify({ v: 1, t: compact });
+    return encodeURIComponent(json);
+  } catch {
+    return null;
+  }
+}
+
+function decodeShareData(raw) {
+  try {
+    const parsed = JSON.parse(decodeURIComponent(raw));
+    if (parsed.v !== 1 || !parsed.t) return null;
+    const tiers = {};
+    for (const key of TIERS) {
+      tiers[key] = (parsed.t[key] || []).map(([name, thumb]) => ({
+        name,
+        thumbnail: thumb,
+      }));
+    }
+    return tiers;
+  } catch {
+    return null;
+  }
+}
+
+export function SharedTierView({ data, onBack }) {
+  const { t } = useLang();
+  const tiers = typeof data === "string" ? decodeShareData(data) : data;
+  if (!tiers) {
+    return (
+      <div className="tierlist-shared-error">
+        <p>{t("tierlist.shareInvalid")}</p>
+        {onBack && <button className="tierlist-shared-back" onClick={onBack}>{t("tierlist.goBack")}</button>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="tierlist-shared-root">
+      <div className="tierlist-shared-header">
+        {onBack && (
+          <button className="tierlist-shared-back" onClick={onBack}>
+            <ArrowLeft size={16} /> {t("tierlist.goBack")}
+          </button>
+        )}
+        <h2>{t("tierlist.sharedTitle")}</h2>
+      </div>
+      <div className="tierlist-rows">
+        {TIERS.map((key) => (
+          <div key={key} className="tier-row">
+            <div
+              className="tier-label"
+              style={{ backgroundColor: TIER_COLORS[key].bg, color: TIER_COLORS[key].text }}
+            >
+              {key}
+            </div>
+            <div className="tier-games">
+              {tiers[key].length === 0 && (
+                <span className="tier-empty">{t("tierlist.emptyTier")}</span>
+              )}
+              {tiers[key].map((game, i) => (
+                <TierGameCard key={i} game={game} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function TierList() {
   const { t } = useLang();
   const [tiers, setTiers] = useState(loadTiers);
@@ -63,9 +142,9 @@ export default function TierList() {
   const fetchGames = useCallback(async (q, p) => {
     setLoading(true);
     try {
-      const params = { limit: 20, page: p };
+      const params = { page_size: 20, page: p };
       if (q.trim()) params.name = q.trim();
-      const res = await client.get("/api/games", { params });
+      const res = await client.get("/api/games/rawg/search", { params });
       const list = res.data.games || [];
       if (p === 1) setGames(list);
       else setGames((prev) => [...prev, ...list]);
@@ -130,6 +209,19 @@ export default function TierList() {
     setTiers({ S: [], A: [], B: [], C: [], D: [], E: [] });
   };
 
+  const handleShare = () => {
+    const encoded = encodeShareData(tiers);
+    if (!encoded) return;
+    const url = `${window.location.origin}${window.location.pathname}?tier=${encoded}`;
+    if (navigator.share) {
+      navigator.share({ title: t("tierlist.sharedTitle"), url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        alert(t("tierlist.shareCopied"));
+      }).catch(() => {});
+    }
+  };
+
   const handleDragStart = (e, game) => {
     dragGameRef.current = game;
     e.dataTransfer.effectAllowed = "move";
@@ -168,6 +260,9 @@ export default function TierList() {
         <div className="tierlist-header">
           <Layers size={18} />
           <h2>{t("tierlist.title")}</h2>
+          <button className="tierlist-share-btn" onClick={handleShare} title={t("tierlist.share")}>
+            <Share2 size={14} />
+          </button>
           <button className="tierlist-reset-btn" onClick={resetAll} title={t("tierlist.resetAll")}>
             <RotateCcw size={14} />
           </button>

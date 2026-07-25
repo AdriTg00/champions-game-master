@@ -2,6 +2,7 @@ import axios from "axios";
 import gameDAO from "../repo/gameDAO.js";
 import { escapeRegex } from '../utils/security.js';
 import logger from '../utils/logger.js';
+import { config } from '../utils/config.js';
 
 const isValidId = (id) => id && typeof id === 'string' && id.length > 0;
 
@@ -25,6 +26,49 @@ export const createGame = async (req, res) => {
   } catch (err) {
     logger.error("createGame:", { message: err.message });
     return res.status(500).json({ error: "Error al crear juego" });
+  }
+};
+
+export const searchRawg = async (req, res) => {
+  try {
+    const query = req.query.name || "";
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const pageSize = Math.min(parseInt(req.query.page_size) || 20, 40);
+
+    if (!config.rawgApiKey) {
+      return res.status(500).json({ error: "RAWG API key not configured" });
+    }
+
+    let url = `https://api.rawg.io/api/games?key=${config.rawgApiKey}&page=${page}&page_size=${pageSize}`;
+    if (query.trim()) {
+      url += `&search=${encodeURIComponent(query.trim())}&search_exact=true`;
+    } else {
+      url += `&ordering=-added`;
+    }
+
+    const response = await axios.get(url, { timeout: 10000 });
+    const rawgData = response.data;
+    const results = (rawgData.results || []).map((g) => ({
+      _id: `rawg-${g.id}`,
+      id: `rawg-${g.id}`,
+      name: g.name,
+      thumbnail: g.background_image || "",
+      genre: (g.genres || []).map((x) => x.name).join(", "),
+      platform: (g.platforms || []).map((p) => p.platform?.name).filter(Boolean).join(", "),
+      metacritic: g.metacritic || 0,
+      rating: g.rating || 0,
+      released: g.released || "",
+    }));
+
+    return res.status(200).json({
+      count: rawgData.count || 0,
+      page,
+      page_size: pageSize,
+      games: results,
+    });
+  } catch (err) {
+    logger.error("searchRawg:", { message: err.message });
+    return res.status(500).json({ error: "Error searching RAWG" });
   }
 };
 
