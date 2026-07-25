@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Search, ChevronDown, X, Layers, RotateCcw, Loader2, Share2, ArrowLeft } from "lucide-react";
 import client from "../api/client";
 import { useLang } from "../i18n/useTranslations";
@@ -340,13 +341,15 @@ export default function TierList() {
                 {tiers[key].length === 0 && (
                   <span className="tier-empty">{t("tierlist.emptyTier")}</span>
                 )}
-                {tiers[key].map((game) => (
-                  <TierGameCard
-                    key={getGameId(game)}
-                    game={game}
-                    onClick={() => removeFromTier(game)}
-                  />
-                ))}
+                <AnimatePresence mode="popLayout">
+                  {tiers[key].map((game) => (
+                    <TierGameCard
+                      key={getGameId(game)}
+                      game={game}
+                      onClick={() => removeFromTier(game)}
+                    />
+                  ))}
+                </AnimatePresence>
               </div>
               {tiers[key].length > 0 && (
                 <button className="tier-clear-btn" onClick={() => resetTier(key)} title={t("tierlist.clear")}>
@@ -379,21 +382,31 @@ export default function TierList() {
         </div>
 
         <div className="tierlist-browser-grid">
-          {displayed.map((game) => {
-            const assigned = inAnyTier(game);
-            const isSelected = selectedGame && getGameId(selectedGame) === getGameId(game);
-            return (
-              <BrowserCard
-                key={getGameId(game)}
-                game={game}
-                assigned={assigned}
-                selected={isSelected}
-                onDragStart={(e) => handleDragStart(e, game)}
-                onDragEnd={handleDragEnd}
-                onClick={() => handleBrowserClick(game)}
-              />
-            );
-          })}
+          <AnimatePresence mode="popLayout">
+            {displayed.map((game, i) => {
+              const assigned = inAnyTier(game);
+              const isSelected = selectedGame && getGameId(selectedGame) === getGameId(game);
+              return (
+                <motion.div
+                  key={getGameId(game)}
+                  layout
+                  initial={{ opacity: 0, y: 20, scale: 0.92 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 24, delay: i * 0.025 }}
+                >
+                  <BrowserCard
+                    game={game}
+                    assigned={assigned}
+                    selected={isSelected}
+                    onDragStart={(e) => handleDragStart(e, game)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => handleBrowserClick(game)}
+                  />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
           {error && (
             <p className="tierlist-no-results">{t("tierlist.searchError")}</p>
           )}
@@ -429,7 +442,18 @@ function TierGameCard({ game, onClick }) {
   const colors = getGameColors(name || "?");
 
   return (
-    <div className="tier-game-card" onClick={onClick} title={t("tierlist.remove")}>
+    <motion.div
+      className="tier-game-card"
+      onClick={onClick}
+      title={t("tierlist.remove")}
+      layout
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.93 }}
+    >
       <div className="tier-game-img-wrap">
         {thumb ? (
           <img src={thumb} alt={name} className="tier-game-img" referrerPolicy="no-referrer" />
@@ -438,7 +462,7 @@ function TierGameCard({ game, onClick }) {
         )}
       </div>
       <span className="tier-game-label">{name}</span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -454,12 +478,15 @@ function BrowserCard({ game, assigned, selected, onDragStart, onDragEnd, onClick
   ].join("");
 
   return (
-    <div
+    <motion.div
       className={cls}
       draggable={!assigned}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
+      whileHover={assigned ? {} : { y: -4 }}
+      whileTap={assigned ? {} : { scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <div className="browser-card-img-wrap">
         {thumb ? (
@@ -469,6 +496,6 @@ function BrowserCard({ game, assigned, selected, onDragStart, onDragEnd, onClick
         )}
       </div>
       <span className="browser-card-name">{name}</span>
-    </div>
+    </motion.div>
   );
 }
