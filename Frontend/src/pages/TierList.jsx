@@ -132,12 +132,16 @@ export default function TierList() {
   const { t } = useLang();
   const [tiers, setTiers] = useState(loadTiers);
   const [allGames, setAllGames] = useState([]);
+  const [remoteGames, setRemoteGames] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [remoteLoading, setRemoteLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dragOverTier, setDragOverTier] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
   const dragGameRef = useRef(null);
+  const queryRef = useRef("");
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -160,17 +164,55 @@ export default function TierList() {
 
   const [page, setPage] = useState(1);
   const q = query.trim().toLowerCase();
+
+  const localStarts = [];
+  const localContains = [];
+  const localRest = [];
+  for (const g of allGames) {
+    const n = (g.name || g.title || "").toLowerCase();
+    if (q && n.startsWith(q)) localStarts.push(g);
+    else if (q && n.includes(q)) localContains.push(g);
+    else localRest.push(g);
+  }
+  const localDisplay = [...localStarts, ...localContains];
+  const remoteIds = new Set(remoteGames.map((g) => getGameId(g)));
+  const undupRemote = remoteGames.filter((g) => !localDisplay.some((l) => getGameId(l) === getGameId(g)));
+
   const sorted = q
-    ? [
-        ...allGames.filter((g) => (g.name || "").toLowerCase().includes(q)),
-        ...allGames.filter((g) => !(g.name || "").toLowerCase().includes(q)),
-      ]
+    ? [...undupRemote, ...localDisplay, ...localRest]
     : allGames;
   const PAGE_SIZE = 20;
   const displayed = sorted.slice(0, page * PAGE_SIZE);
   const hasMore = displayed.length < sorted.length;
 
-  const handleSearch = (e) => { setQuery(e.target.value); setPage(1); };
+  const handleSearch = (e) => {
+    setQuery(e.target.value);
+    setPage(1);
+    setRemoteGames([]);
+  };
+
+  useEffect(() => {
+    const val = query.trim();
+    if (!val) { setRemoteGames([]); return; }
+    queryRef.current = val;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setRemoteLoading(true);
+      try {
+        const res = await client.get("/api/games/rawg/search", {
+          params: { name: val, page_size: 20, page: 1 },
+        });
+        if (queryRef.current !== val) return;
+        setRemoteGames(res.data.games || []);
+      } catch {
+        if (queryRef.current === val) setRemoteGames([]);
+      } finally {
+        setRemoteLoading(false);
+      }
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query]);
+
   const loadMore = () => setPage((p) => p + 1);
 
   const addToTier = (game, tierKey) => {
@@ -361,6 +403,11 @@ export default function TierList() {
           {loading && (
             <div className="tierlist-loading">
               <Loader2 size={20} className="spin" />
+            </div>
+          )}
+          {remoteLoading && !loading && (
+            <div className="tierlist-loading">
+              <Loader2 size={16} className="spin" /> {t("tierlist.searching")}
             </div>
           )}
         </div>
