@@ -144,7 +144,8 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: color-mix(in oklab, var(--card) 85%, transparent);
   backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
@@ -170,6 +171,8 @@
   cursor: pointer;
   transition: color 0.15s;
   min-width: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-bottom-link span {
@@ -183,9 +186,16 @@
   color: var(--foreground);
 }
 
+@media (max-width: 380px) {
+  .mobile-bottom-link {
+    padding: 0.25rem 0.25rem;
+    font-size: 0.55rem;
+  }
+}
+
 /* Add bottom padding to main content so it doesn't hide behind nav */
 .app-shell {
-  padding-bottom: 64px;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 640px) {
