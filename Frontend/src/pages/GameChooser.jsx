@@ -75,7 +75,7 @@ function ProgressBlock({ round, total, onRestart }) {
       </div>
       <div className="progress-track">
         <div className="progress-bar-new">
-          <div className="progress-bar-fill-new" style={{ width: `${pct}%` }} />
+          <div className="progress-bar-fill-new" style={{ transform: `scaleX(${pct / 100})` }} />
         </div>
         <span className="progress-pct">{pct}%</span>
       </div>

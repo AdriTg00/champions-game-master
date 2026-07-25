@@ -109,6 +109,7 @@ export default {
     tier: "Tier",
     clear: "Limpiar",
     resetAll: "Reiniciar todo",
+    clearAll: "Limpiar todo",
     browser: "Explorador de Juegos",
     searchPlaceholder: "Buscar juegos...",
     loadMore: "Cargar más",

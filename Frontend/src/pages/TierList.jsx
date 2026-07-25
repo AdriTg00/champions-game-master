@@ -131,63 +131,47 @@ export function SharedTierView({ data, onBack }) {
 export default function TierList() {
   const { t } = useLang();
   const [tiers, setTiers] = useState(loadTiers);
-  const [games, setGames] = useState([]);
+  const [allGames, setAllGames] = useState([]);
   const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dragOverTier, setDragOverTier] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
   const dragGameRef = useRef(null);
-  const queryRef = useRef("");
-  const debounceRef = useRef(null);
-
-  const fetchGames = useCallback(async (q, p) => {
-    queryRef.current = q;
-    setError(null);
-
-    const controller = new AbortController();
-    try {
-      setLoading(true);
-      const params = { page_size: 20, page: p };
-      if (q.trim()) params.name = q.trim();
-      const res = await client.get("/api/games/rawg/search", { params, signal: controller.signal });
-      if (queryRef.current !== q) return;
-      const list = res.data.games || [];
-      if (p === 1) setGames(list);
-      else setGames((prev) => [...prev, ...list]);
-      setHasMore(list.length === 20);
-    } catch (err) {
-      if (err?.name !== "CanceledError" && err?.code !== "ERR_CANCELED") {
-        setError(true);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setPage(1);
-      fetchGames(query, 1);
-    }, 300);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [query, fetchGames]);
+    client.get("/api/games", { params: { limit: 500 } })
+      .then((res) => {
+        if (!cancelled) {
+          setAllGames(res.data.games || []);
+          setError(null);
+        }
+      })
+      .catch(() => { if (!cancelled) setError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     saveTiers(tiers);
   }, [tiers]);
 
-  const handleSearch = (e) => { setQuery(e.target.value); };
+  const [page, setPage] = useState(1);
+  const q = query.trim().toLowerCase();
+  const sorted = q
+    ? [
+        ...allGames.filter((g) => (g.name || "").toLowerCase().includes(q)),
+        ...allGames.filter((g) => !(g.name || "").toLowerCase().includes(q)),
+      ]
+    : allGames;
+  const PAGE_SIZE = 20;
+  const displayed = sorted.slice(0, page * PAGE_SIZE);
+  const hasMore = displayed.length < sorted.length;
 
-  const loadMore = () => {
-    const next = page + 1;
-    setPage(next);
-    fetchGames(query, next);
-  };
+  const handleSearch = (e) => { setQuery(e.target.value); setPage(1); };
+  const loadMore = () => setPage((p) => p + 1);
 
   const addToTier = (game, tierKey) => {
     const id = getGameId(game);
@@ -290,8 +274,8 @@ export default function TierList() {
           <button className="tierlist-share-btn" onClick={handleShare} title={t("tierlist.share")}>
             <Share2 size={14} />
           </button>
-          <button className="tierlist-reset-btn" onClick={resetAll} title={t("tierlist.resetAll")}>
-            <RotateCcw size={14} />
+          <button className="tierlist-clear-all-btn" onClick={resetAll}>
+            <RotateCcw size={14} /> {t("tierlist.clearAll")}
           </button>
         </div>
         <div className="tierlist-rows">
@@ -353,7 +337,7 @@ export default function TierList() {
         </div>
 
         <div className="tierlist-browser-grid">
-          {games.map((game) => {
+          {displayed.map((game) => {
             const assigned = inAnyTier(game);
             const isSelected = selectedGame && getGameId(selectedGame) === getGameId(game);
             return (
@@ -371,7 +355,7 @@ export default function TierList() {
           {error && (
             <p className="tierlist-no-results">{t("tierlist.searchError")}</p>
           )}
-          {!loading && !error && games.length === 0 && (
+          {!loading && !error && allGames.length === 0 && (
             <p className="tierlist-no-results">{t("tierlist.noResults")}</p>
           )}
           {loading && (

@@ -113,11 +113,11 @@
   font-size: 40px;
   position: absolute;
   top: -70px;
-  animation: crownBounce 2s ease-in-out infinite;
+  animation: crownFloat 2s ease-in-out infinite;
   filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
 }
 
-@keyframes crownBounce {
+@keyframes crownFloat {
   0%, 100% { transform: translateY(0) rotate(-5deg); }
   50% { transform: translateY(-15px) rotate(5deg); }
 }

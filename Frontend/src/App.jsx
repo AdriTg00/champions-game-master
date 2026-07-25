@@ -212,10 +212,10 @@ export default function App() {
   }, [champion, left, right, choiceCount, recordVote, markPickOnServer, getNextFromBuffer, setChampion, setRight, setLeft, setChoiceCount, setScreen]);
 
   const restart = useCallback(() => {
+    reset();
     startGame(games, mockGames, shuffleArray, {
       setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount,
     });
-    reset();
     setScreen("home");
   }, [games, setGames, reset, setChampion, setLeft, setRight, setChoiceCount]);
 
@@ -228,12 +228,18 @@ export default function App() {
       handleLogout();
     } else if (target === "login") {
       setAuthScreen("login");
-    } else if (target === "game" && choiceCount >= MAX_CHOICES) {
-      restart();
+    } else if (target === "game") {
+      if (choiceCount >= MAX_CHOICES || (!left && !right && !champion)) {
+        reset();
+        startGame(games, mockGames, shuffleArray, {
+          setChampion, setLeft, setRight, setGames, setBufferIndex, setChoiceCount,
+        });
+      }
+      setScreen("game");
     } else {
       setScreen(target);
     }
-  }, [handleLogout, choiceCount, restart]);
+  }, [handleLogout, choiceCount, left, right, champion, games, setGames, reset, setChampion, setLeft, setRight, setChoiceCount]);
 
   if (sharedTier) {
     return (
