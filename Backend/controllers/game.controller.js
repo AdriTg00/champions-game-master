@@ -36,7 +36,7 @@ export const searchRawg = async (req, res) => {
     const pageSize = Math.min(parseInt(req.query.page_size) || 20, 40);
 
     if (!config.rawgApiKey) {
-      return res.status(500).json({ error: "RAWG API key not configured" });
+      return await searchLocalGames(req, res);
     }
 
     let url = `https://api.rawg.io/api/games?key=${config.rawgApiKey}&page=${page}&page_size=${pageSize}`;
@@ -67,10 +67,42 @@ export const searchRawg = async (req, res) => {
       games: results,
     });
   } catch (err) {
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      logger.warn("RAWG API key rejected, falling back to local search");
+      return await searchLocalGames(req, res);
+    }
     logger.error("searchRawg:", { message: err.message });
     return res.status(500).json({ error: "Error searching RAWG" });
   }
 };
+
+async function searchLocalGames(req, res) {
+  const query = req.query.name || "";
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const pageSize = Math.min(parseInt(req.query.page_size) || 20, 40);
+  const filter = {};
+  if (query.trim()) {
+    filter.name = { $regex: escapeRegex(query.trim()), $options: "i" };
+  }
+  try {
+    const { data, total } = await gameDAO.findAll({ filter, page, limit: pageSize, sort: { name: 1 } });
+    const results = data.map((g) => ({
+      _id: g._id,
+      id: g._id,
+      name: g.name,
+      thumbnail: g.thumbnail || "",
+      genre: g.genre || "",
+      platform: g.platform || "",
+      metacritic: g.metacritic || 0,
+      rating: g.rating || 0,
+      released: "",
+    }));
+    return res.status(200).json({ count: total, page, page_size: pageSize, games: results });
+  } catch (err) {
+    logger.error("searchLocalGames:", { message: err.message });
+    return res.status(500).json({ error: "Error searching games" });
+  }
+}
 
 export const getAllGames = async (req, res) => {
   try {
