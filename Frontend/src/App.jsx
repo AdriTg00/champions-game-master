@@ -1,6 +1,6 @@
 import { useEffect, useState, Suspense, lazy, useCallback, memo } from "react";
 import { useAuthStore } from "./store/authStore";
-import { useGameStore } from "./store/gameStore";
+import { useGameStore, MAX_CHOICES } from "./store/gameStore";
 import { shuffleArray } from "./utils/shuffle";
 import { useLang } from "./i18n/useTranslations";
 import Login from "./pages/Login";
@@ -31,7 +31,6 @@ import { mockGames } from "./mock/games";
 import client from "./api/client";
 
 const MAX_RANDOM_GAMES = 200;
-const MAX_CHOICES = 30;
 
 const MemoLogin = memo(Login);
 const MemoRegister = memo(Register);

@@ -5,25 +5,11 @@ import {
   CheckCircle, CircleDashed, Trash2, Heart, ListFilter,
   ChevronDown, Loader2,
 } from "lucide-react";
+import { getGameColors } from "../utils/gameColors";
 import client from "../api/client";
 import { useLang } from "../i18n/useTranslations";
 import { useLibraryStore, STATUSES, STATUS_LABELS, STATUS_COLORS } from "../store/libraryStore";
 import "./Library.css";
-
-const GAME_COLORS = {
-  "Elden Ring": { color: "#3a2f1a", accent: "#d4a24a" },
-  "The Legend of Zelda: Breath of the Wild": { color: "#123a2a", accent: "#7fd4a6" },
-  "Red Dead Redemption 2": { color: "#3a1414", accent: "#e07a56" },
-  "The Witcher 3: Wild Hunt": { color: "#1f1a12", accent: "#c8a878" },
-  "Baldur's Gate 3": { color: "#241226", accent: "#c68ad6" },
-};
-
-function getGameColors(name) {
-  if (GAME_COLORS[name]) return GAME_COLORS[name];
-  const hash = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const hue = hash % 360;
-  return { color: `oklch(0.2 0.04 ${hue})`, accent: `oklch(0.7 0.15 ${hue})` };
-}
 
 function getStatusIcon(status) {
   switch (status) {

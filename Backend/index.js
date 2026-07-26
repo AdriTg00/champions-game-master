@@ -15,11 +15,10 @@ const app = express();
 app.use(helmet());
 app.use(apiLimiter);
 
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',').map(s => s.trim());
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://championsweb.adriantarancon.dev'
-  ],
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
