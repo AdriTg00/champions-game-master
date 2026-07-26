@@ -16,6 +16,7 @@ import {
   importAllFromFreeToGame,
   getCompactGames
 } from '../controllers/game.controller.js';
+import { unifiedSearch } from '../controllers/search.controller.js';
 import { verifyToken, optionalAuth } from '../middleware/auth.js';
 import {
   validateGameCreation,
@@ -35,6 +36,7 @@ const router = express.Router();
 router.post('/', verifyToken, validateGameCreation, createGame);
 router.get('/', getAllGames);
 router.get('/rawg/search', searchRawg);
+router.get('/search', unifiedSearch);
 
 router.get('/external/:id', verifyToken, validateNumericParam, fetchExternalGame);
 router.post('/import/:id', verifyToken, validateNumericParam, importExternalGame);

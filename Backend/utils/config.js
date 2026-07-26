@@ -26,5 +26,8 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   logLevel: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'INFO' : 'DEBUG'),
   rawgApiKey: process.env.RAWG_API_KEY,
+  igdbClientId: process.env.IGDB_CLIENT_ID,
+  igdbClientSecret: process.env.IGDB_CLIENT_SECRET,
+  steamApiKey: process.env.STEAM_API_KEY,
   isVercel: process.env.VERCEL === '1',
 };

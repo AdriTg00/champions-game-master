@@ -197,8 +197,8 @@ export default function TierList() {
     debounceRef.current = setTimeout(async () => {
       setRemoteLoading(true);
       try {
-        const res = await client.get("/api/games/rawg/search", {
-          params: { name: val, page_size: 20, page: 1 },
+        const res = await client.get("/api/games/search", {
+          params: { name: val, page_size: 20 },
         });
         if (queryRef.current !== val) return;
         setRemoteGames(res.data.games || []);
