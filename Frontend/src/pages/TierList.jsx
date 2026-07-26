@@ -176,12 +176,11 @@ export default function TierList() {
   const remoteIds = new Set(remoteGames.map((g) => getGameId(g)));
   const undupRemote = remoteGames.filter((g) => !localDisplay.some((l) => getGameId(l) === getGameId(g)));
 
-  const sorted = q
-    ? [...undupRemote, ...localDisplay, ...localRest]
-    : allGames;
+  const sorted = q ? [...undupRemote, ...localDisplay] : allGames;
   const PAGE_SIZE = 20;
   const displayed = sorted.slice(0, page * PAGE_SIZE);
   const hasMore = displayed.length < sorted.length;
+  const noSearchResults = q && displayed.length === 0 && !loading && !remoteLoading;
 
   const handleSearch = (e) => {
     setQuery(e.target.value);
@@ -408,7 +407,10 @@ export default function TierList() {
           {error && (
             <p className="tierlist-no-results">{t("tierlist.searchError")}</p>
           )}
-          {!loading && !error && allGames.length === 0 && (
+          {noSearchResults && (
+            <p className="tierlist-no-results">{t("tierlist.noSearchResults")}</p>
+          )}
+          {!loading && !error && !q && allGames.length === 0 && (
             <p className="tierlist-no-results">{t("tierlist.noResults")}</p>
           )}
           {loading && (

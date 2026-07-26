@@ -168,6 +168,7 @@ export default {
     searchPlaceholder: "Search games...",
     loadMore: "Load more",
     noResults: "No games found",
+    noSearchResults: "No games match your search in local DB, RAWG, Steam or IGDB",
     searchError: "Search failed, try again",
     searching: "Searching...",
     remove: "Remove from tier",

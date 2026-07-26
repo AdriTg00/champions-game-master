@@ -168,6 +168,7 @@ export default {
     searchPlaceholder: "Buscar juegos...",
     loadMore: "Cargar más",
     noResults: "No se encontraron juegos",
+    noSearchResults: "No hay resultados en BD local, RAWG, Steam ni IGDB",
     searchError: "Búsqueda falló, intenta de nuevo",
     searching: "Buscando...",
     remove: "Quitar del tier",
