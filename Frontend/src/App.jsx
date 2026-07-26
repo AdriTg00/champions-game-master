@@ -3,6 +3,9 @@ import { useAuthStore } from "./store/authStore";
 import { useGameStore, MAX_CHOICES } from "./store/gameStore";
 import { shuffleArray } from "./utils/shuffle";
 import { useLang } from "./i18n/useTranslations";
+import { syncAfterLogin } from "./utils/syncData";
+import { loadHistory, syncHistoryFromServer } from "./store/historyStore";
+import { loadTiersFromServer } from "./pages/TierList";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 const Home = lazy(() => import("./pages/Home"));
@@ -96,9 +99,18 @@ export default function App() {
     }
   }, [token, user]);
 
-  const handleLogin = useCallback((userData, authToken) => {
+  const handleLogin = useCallback(async (userData, authToken) => {
     setUser(userData, authToken);
     setAuthScreen("app");
+
+    const gs = useGameStore.getState();
+    await syncAfterLogin({
+      votes: { votesMap: gs.votesMap, choiceCount: gs.choiceCount },
+      history: loadHistory(),
+    });
+    await useGameStore.getState().syncVotesFromServer();
+    await syncHistoryFromServer();
+    await loadTiersFromServer();
   }, [setUser]);
 
   const handleRegister = useCallback((userData, authToken) => {

@@ -4,6 +4,7 @@ import { Search, ChevronDown, X, Layers, RotateCcw, Loader2, Share2, ArrowLeft }
 import client from "../api/client";
 import { useLang } from "../i18n/useTranslations";
 import { getGameColors } from "../utils/gameColors";
+import { syncUpload, syncDownload } from "../utils/syncData";
 import GameCover from "../components/GameCover";
 import "./TierList.css";
 
@@ -30,6 +31,16 @@ function loadTiers() {
 
 function saveTiers(tiers) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tiers)); } catch {}
+  syncUpload("tierlist", tiers);
+}
+
+export async function loadTiersFromServer() {
+  const server = await syncDownload("tierlist");
+  if (server) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(server)); } catch {}
+    return server;
+  }
+  return null;
 }
 
 function getGameId(game) {

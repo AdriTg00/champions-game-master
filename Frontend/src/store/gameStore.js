@@ -1,6 +1,7 @@
 // src/store/gameStore.js
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { syncUpload, syncDownload } from '../utils/syncData';
 
 export const MAX_CHOICES = 30;
 
@@ -16,15 +17,12 @@ export const useGameStore = create(
   bufferIndex: 0,
   isFinished: false,
   
-  // Estado de votación
   choiceCount: 0,
   votesMap: {},
   
-  // UI estado
   loading: false,
   error: null,
 
-  // Acciones
   setGames: (games) => set({ games }),
   
   setChampion: (champion) => set({ champion }),
@@ -41,42 +39,40 @@ export const useGameStore = create(
   
   setError: (error) => set({ error }),
   
-  // Registrar voto
-  recordVote: (gameId) => set((state) => {
+  recordVote: (gameId) => {
+    const state = get();
     const newVotesMap = { ...state.votesMap };
     const newChoiceCount = state.choiceCount + 1;
     const isFinished = newChoiceCount >= state.MAX_CHOICES;
     newVotesMap[gameId] = (newVotesMap[gameId] || 0) + 1;
-    return {
-      votesMap: newVotesMap,
-      choiceCount: newChoiceCount,
-      isFinished
-    };
-  }),
+    set({ votesMap: newVotesMap, choiceCount: newChoiceCount, isFinished });
+    syncUpload("votes", { votesMap: newVotesMap, choiceCount: newChoiceCount });
+  },
   
-  // Reset completo
-  reset: () => set({
-    champion: null,
-    left: null,
-    right: null,
-    bufferIndex: 0,
-    isFinished: false,
-    choiceCount: 0,
-    votesMap: {},
-    error: null
-  }),
+  reset: () => {
+    set({
+      champion: null, left: null, right: null, bufferIndex: 0,
+      isFinished: false, choiceCount: 0, votesMap: {}, error: null,
+    });
+    syncUpload("votes", { votesMap: {}, choiceCount: 0 });
+  },
   
-  // Obtener ranking
   getRanking: () => {
     const state = get();
     const ranking = Object.entries(state.votesMap).map(([gameId, count]) => {
       const game = state.games.find(g => (g._id || g.id) === gameId);
       return game ? { ...game, count } : null;
     }).filter(Boolean);
-    
     ranking.sort((a, b) => b.count - a.count);
     return ranking;
-  }
+  },
+
+  syncVotesFromServer: async () => {
+    const server = await syncDownload("votes");
+    if (server && server.votesMap) {
+      set({ votesMap: server.votesMap, choiceCount: server.choiceCount || 0 });
+    }
+  },
 }),
   {
     name: 'game-storage',
