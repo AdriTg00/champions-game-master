@@ -1,17 +1,27 @@
 import { config as dotenvConfig } from 'dotenv';
 dotenvConfig();
 
-const required = (key) => {
-  if (!process.env[key]) {
-    throw new Error(`Missing required env var: ${key}`);
+const env = (key, fallback) => {
+  const val = process.env[key] ?? fallback;
+  if (val === undefined) {
+    console.error(`FATAL: Missing required env var: ${key}`);
+    process.exit(1);
   }
-  return process.env[key];
+  return val;
+};
+
+const warnEnv = (key, fallback) => {
+  const val = process.env[key] ?? fallback;
+  if (!process.env[key]) {
+    console.warn(`WARNING: ${key} not set. Using development fallback. Set ${key} in production.`);
+  }
+  return val;
 };
 
 export const config = {
   port: parseInt(process.env.PORT, 10) || 8080,
-  mongoUri: required('MONGO_URI'),
-  jwtSecret: required('JWT_SECRET'),
+  mongoUri: env('MONGO_URI'),
+  jwtSecret: process.env.JWT_SECRET,
   jwtExpiration: process.env.JWT_EXPIRATION || '24h',
   nodeEnv: process.env.NODE_ENV || 'development',
   logLevel: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'INFO' : 'DEBUG'),

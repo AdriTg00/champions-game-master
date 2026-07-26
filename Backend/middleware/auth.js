@@ -5,6 +5,9 @@ export const generateToken = (user) => {
   if (!user._id && !user.id) {
     throw new Error('User ID is required to generate token');
   }
+  if (!config.jwtSecret) {
+    throw new Error('JWT_SECRET environment variable is not configured');
+  }
 
   const payload = {
     id: user._id || user.id
@@ -18,6 +21,10 @@ export const generateToken = (user) => {
 
 export const verifyToken = (req, res, next) => {
   try {
+    if (!config.jwtSecret) {
+      return res.status(500).json({ error: 'Servidor mal configurado: falta JWT_SECRET' });
+    }
+
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -55,6 +62,8 @@ export const requireOwnership = (req, res, next) => {
 
 export const optionalAuth = (req, res, next) => {
   try {
+    if (!config.jwtSecret) return next();
+
     const authHeader = req.headers.authorization;
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
