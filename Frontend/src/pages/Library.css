@@ -534,11 +534,19 @@
   border: 1px solid var(--border);
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .library-add-result:hover {
   border-color: var(--accent);
   background: color-mix(in oklab, var(--accent) 10%, transparent);
+}
+
+.library-add-result:active {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 20%, transparent);
+  transform: scale(0.98);
 }
 
 .library-add-result-img-wrap {

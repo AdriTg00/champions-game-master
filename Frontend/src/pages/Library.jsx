@@ -483,10 +483,9 @@ function AddPanel({ addSearch, onSearchChange, addResults, addLoading, addStatus
                 const name = game.name || game.title || "";
                 const thumb = game.thumbnail || game.background_image || "";
                 return (
-                  <motion.div
+                  <div
                     key={game._id || game.id}
                     className="library-add-result"
-                    whileHover={{ y: -2 }}
                     onClick={() => onAdd(game)}
                   >
                     <div className="library-add-result-img-wrap">
@@ -501,7 +500,7 @@ function AddPanel({ addSearch, onSearchChange, addResults, addLoading, addStatus
                       <span className="library-add-result-meta">{game.genre || game.genres?.map((g) => g.name || g).join(", ") || ""}</span>
                     </div>
                     <Plus size={16} className="library-add-result-icon" />
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
