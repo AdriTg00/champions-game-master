@@ -72,25 +72,24 @@ export async function unifiedSearch(req, res) {
       return res.status(200).json({ games });
     }
 
+    const allResults = await Promise.allSettled(
+      SOURCE_PRIORITY.map((source) => {
+        const fn = SOURCES[source];
+        return fn ? fn(query, pageSize) : [];
+      })
+    );
+
     const seen = new Set();
     const results = [];
-    let remaining = pageSize;
 
-    for (const source of SOURCE_PRIORITY) {
-      if (remaining <= 0) break;
-      const fn = SOURCES[source];
-      if (!fn) continue;
-
-      const games = await fn(query, remaining);
-      if (!games) continue;
-
+    for (const settled of allResults) {
+      const games = settled.status === "fulfilled" ? settled.value : [];
+      if (!Array.isArray(games)) continue;
       for (const g of games) {
-        if (remaining <= 0) break;
         const key = g.name.toLowerCase().trim();
         if (!key || seen.has(key)) continue;
         seen.add(key);
         results.push(g);
-        remaining--;
       }
     }
 
@@ -103,7 +102,7 @@ export async function unifiedSearch(req, res) {
       return aS - bS;
     });
 
-    return res.status(200).json({ games: results });
+    return res.status(200).json({ games: results.slice(0, pageSize) });
   } catch (err) {
     logger.error("unifiedSearch error:", { message: err.message });
     return res.status(500).json({ error: "Error en búsqueda" });
