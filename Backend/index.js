@@ -15,7 +15,9 @@ const app = express();
 app.use(helmet());
 app.use(apiLimiter);
 
-const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',').map(s => s.trim());
+const defaultOrigins = ['http://localhost:5173', 'https://championsweb.adriantarancon.dev'];
+const extraOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map(s => s.trim()) : [];
+const corsOrigins = [...defaultOrigins, ...extraOrigins];
 
 app.use(cors({
   origin: corsOrigins,
