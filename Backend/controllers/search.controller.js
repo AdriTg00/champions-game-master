@@ -6,7 +6,7 @@ import { searchSteam } from "../services/steam.service.js";
 import gameDAO from "../repo/gameDAO.js";
 import logger from "../utils/logger.js";
 
-const SOURCE_PRIORITY = ["rawg", "igdb", "steam", "local"];
+const SOURCE_PRIORITY = ["local", "rawg", "steam", "igdb"];
 
 async function searchRawg(query, pageSize) {
   if (!config.rawgApiKey) return [];
