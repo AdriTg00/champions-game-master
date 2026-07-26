@@ -66,6 +66,7 @@ export async function unifiedSearch(req, res) {
   try {
     const query = (req.query.name || "").trim();
     const pageSize = Math.min(parseInt(req.query.page_size) || 10, 30);
+    const sourceLimit = Math.max(pageSize, 50);
 
     if (!query) {
       const games = await searchLocal("", pageSize);
@@ -75,7 +76,7 @@ export async function unifiedSearch(req, res) {
     const allResults = await Promise.allSettled(
       SOURCE_PRIORITY.map((source) => {
         const fn = SOURCES[source];
-        return fn ? fn(query, pageSize) : [];
+        return fn ? fn(query, sourceLimit) : [];
       })
     );
 
@@ -94,15 +95,13 @@ export async function unifiedSearch(req, res) {
     }
 
     results.sort((a, b) => {
-      const aE = a.name.toLowerCase() === query.toLowerCase() ? 0 : 1;
-      const bE = b.name.toLowerCase() === query.toLowerCase() ? 0 : 1;
-      if (aE !== bE) return aE - bE;
-      const aS = a.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1;
-      const bS = b.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1;
-      return aS - bS;
+      const yA = parseInt(a.released) || 0;
+      const yB = parseInt(b.released) || 0;
+      if (yA !== yB) return yA - yB;
+      return (a.name || "").localeCompare(b.name || "");
     });
 
-    return res.status(200).json({ games: results.slice(0, pageSize) });
+    return res.status(200).json({ games: results });
   } catch (err) {
     logger.error("unifiedSearch error:", { message: err.message });
     return res.status(500).json({ error: "Error en búsqueda" });

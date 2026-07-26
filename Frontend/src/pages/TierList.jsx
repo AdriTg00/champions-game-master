@@ -197,7 +197,7 @@ export default function TierList() {
       setRemoteLoading(true);
       try {
         const res = await client.get("/api/games/search", {
-          params: { name: val, page_size: 20 },
+          params: { name: val, page_size: 50 },
         });
         if (queryRef.current !== val) return;
         setRemoteGames(res.data.games || []);

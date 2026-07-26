@@ -78,7 +78,7 @@ export default function Library() {
     addDebounceRef.current = setTimeout(async () => {
       setAddLoading(true);
       try {
-        const res = await client.get("/api/games/search", { params: { name: val, page_size: 10 } });
+        const res = await client.get("/api/games/search", { params: { name: val, page_size: 50 } });
         if (addQueryRef.current !== val) return;
         setAddResults(res.data.games || []);
       } catch { if (addQueryRef.current === val) setAddResults([]); }
