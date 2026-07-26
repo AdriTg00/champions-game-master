@@ -16,6 +16,7 @@ const TierList = lazy(() => import("./pages/TierList"));
 const Library = lazy(() => import("./pages/Library"));
 
 import AmbientBackground from "./components/AmbientBackground";
+import SoundProvider from "./components/SoundProvider";
 import Navbar from "./components/Navbar";
 
 import "./index.css";
@@ -246,7 +247,7 @@ export default function App() {
   }, [handleLogout, choiceCount, left, right, champion, games, setGames, reset, setChampion, setLeft, setRight, setChoiceCount]);
 
   return (
-    <>
+    <SoundProvider>
       <AmbientBackground />
       <div className="app-shell">
         <div className="app-frame">
@@ -298,6 +299,6 @@ export default function App() {
           )}
         </div>
       </div>
-    </>
+    </SoundProvider>
   );
 }

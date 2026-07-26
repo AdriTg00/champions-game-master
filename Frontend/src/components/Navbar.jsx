@@ -35,7 +35,7 @@ export default function Navbar({ screen, onNavigate, theme, onToggleTheme }) {
         }}
       >
         <div className="navbar-inner">
-          <button onClick={() => onNavigate("game")} className="navbar-logo">
+          <button onClick={() => onNavigate("game")} className="navbar-logo" data-sound="sound-click">
             <div className="navbar-logo-icon">
               <Swords size={16} />
             </div>
@@ -50,7 +50,7 @@ export default function Navbar({ screen, onNavigate, theme, onToggleTheme }) {
                   key={item.key}
                   onClick={() => onNavigate(item.key)}
                   className={`nav-link${screen === item.key ? " nav-link-active" : ""}`}
-                >
+                  data-sound="sound-nav">
                   <Icon size={14} /> {t(item.labelKey)}
                 </button>
               );
@@ -62,7 +62,7 @@ export default function Navbar({ screen, onNavigate, theme, onToggleTheme }) {
               onClick={() => switchLang(lang === "en" ? "es" : "en")}
               className="navbar-icon-btn"
               aria-label={t("nav.toggleTheme")}
-            >
+              data-sound="sound-click">
               <Languages size={16} />
               <span style={{ fontSize: 10, marginLeft: 1 }}>{lang === "en" ? "EN" : "ES"}</span>
             </button>
@@ -70,7 +70,7 @@ export default function Navbar({ screen, onNavigate, theme, onToggleTheme }) {
               onClick={onToggleTheme}
               className="navbar-icon-btn"
               aria-label={t("nav.toggleTheme")}
-            >
+              data-sound="sound-click">
               {theme === "dark" ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
               ) : (
@@ -87,7 +87,7 @@ export default function Navbar({ screen, onNavigate, theme, onToggleTheme }) {
               onClick={handleLogout}
               className="navbar-icon-btn"
               aria-label={t("nav.logout")}
-            >
+              data-sound="sound-click">
               <LogOut size={16} />
             </button>
           </div>
@@ -102,7 +102,7 @@ export default function Navbar({ screen, onNavigate, theme, onToggleTheme }) {
               key={item.key}
               onClick={() => onNavigate(item.key)}
               className={`mobile-bottom-link${screen === item.key ? " mobile-bottom-link-active" : ""}`}
-            >
+              data-sound="sound-nav">
               <Icon size={18} />
               <span>{t(item.labelKey)}</span>
             </button>

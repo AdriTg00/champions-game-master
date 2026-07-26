@@ -89,7 +89,7 @@ export default function Login({ onLogin, goRegister }) {
 
             {error && <p className="auth-error" role="alert">{error}</p>}
 
-            <button type="submit" disabled={loading} className="auth-submit">
+            <button type="submit" disabled={loading} className="auth-submit" data-sound="sound-click">
               {loading ? t("auth.signingIn") : t("auth.signIn")}
               <ArrowRight size={16} />
             </button>
@@ -97,7 +97,7 @@ export default function Login({ onLogin, goRegister }) {
 
           <p className="auth-footer-text">
             {t("auth.newHere")}{" "}
-            <button type="button" onClick={goRegister} className="auth-link">
+            <button type="button" onClick={goRegister} className="auth-link" data-sound="sound-nav">
               {t("auth.createAccount")}
             </button>
           </p>

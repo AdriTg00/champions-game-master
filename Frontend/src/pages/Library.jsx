@@ -131,7 +131,7 @@ export default function Library() {
     <div className="library-root">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="library-header">
         <h1 className="library-title">{t("library.title")}</h1>
-        <button className="library-add-btn" onClick={() => setShowAddPanel(true)}>
+        <button className="library-add-btn" onClick={() => setShowAddPanel(true)} data-sound="sound-add">
           <Plus size={16} /> {t("library.addGame")}
         </button>
       </motion.div>
@@ -148,7 +148,7 @@ export default function Library() {
             className="library-search-input"
           />
           {searchQuery && (
-            <button className="library-search-clear" onClick={() => setSearchQuery("")}>
+            <button className="library-search-clear" onClick={() => setSearchQuery("")} data-sound="sound-click">
               <X size={14} />
             </button>
           )}
@@ -169,6 +169,7 @@ export default function Library() {
             className={`library-fav-btn${favoritesOnly ? " library-fav-btn-active" : ""}`}
             onClick={() => setFavoritesOnly((f) => !f)}
             title={t("library.filterFavorites")}
+            data-sound="sound-click"
           >
             <Heart size={14} />
           </button>
@@ -201,6 +202,7 @@ export default function Library() {
               transition={{ type: "spring", stiffness: 260, damping: 24, delay: i * 0.015 }}
               className="library-card"
               onClick={() => setSelectedEntry(entry)}
+              data-sound="sound-select"
             >
               <div className="library-card-img-wrap">
                 {entry.gameThumbnail ? (
@@ -359,7 +361,7 @@ function DetailPanel({ entry, onClose, onUpdate, onDelete, t }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="library-panel-header">
-          <button className="library-panel-close" onClick={onClose}><X size={16} /></button>
+          <button className="library-panel-close" onClick={onClose} data-sound="sound-click"><X size={16} /></button>
           <h2 className="library-panel-title">{entry.gameName}</h2>
         </div>
 
@@ -415,20 +417,20 @@ function DetailPanel({ entry, onClose, onUpdate, onDelete, t }) {
         </div>
 
         <div className="library-panel-actions">
-          <button className="library-panel-btn library-panel-btn-primary" onClick={handleSave} disabled={saving}>
+          <button className="library-panel-btn library-panel-btn-primary" onClick={handleSave} disabled={saving} data-sound="sound-success">
             {saving ? <Loader2 size={14} className="spin" /> : null} {t("library.save")}
           </button>
           {!confirmDelete ? (
-            <button className="library-panel-btn library-panel-btn-danger" onClick={() => setConfirmDelete(true)}>
+            <button className="library-panel-btn library-panel-btn-danger" onClick={() => setConfirmDelete(true)} data-sound="sound-remove">
               <Trash2 size={14} /> {t("library.delete")}
             </button>
           ) : (
             <div className="library-panel-confirm">
               <span>{t("library.deleteConfirm")}</span>
-              <button className="library-panel-btn library-panel-btn-danger" onClick={() => onDelete(entry._id)}>
+              <button className="library-panel-btn library-panel-btn-danger" onClick={() => onDelete(entry._id)} data-sound="sound-remove">
                 {t("library.delete")}
               </button>
-              <button className="library-panel-btn library-panel-btn-ghost" onClick={() => setConfirmDelete(false)}>
+              <button className="library-panel-btn library-panel-btn-ghost" onClick={() => setConfirmDelete(false)} data-sound="sound-click">
                 {t("library.cancel")}
               </button>
             </div>
@@ -457,7 +459,7 @@ function AddPanel({ addSearch, onSearchChange, addResults, addLoading, addStatus
         onClick={(e) => e.stopPropagation()}
       >
         <div className="library-panel-header">
-          <button className="library-panel-close" onClick={onClose}><X size={16} /></button>
+          <button className="library-panel-close" onClick={onClose} data-sound="sound-click"><X size={16} /></button>
           <h2 className="library-panel-title">{t("library.addGame")}</h2>
         </div>
 
@@ -487,6 +489,7 @@ function AddPanel({ addSearch, onSearchChange, addResults, addLoading, addStatus
                     key={game._id || game.id}
                     className="library-add-result"
                     onClick={() => onAdd(game)}
+                    data-sound="sound-add"
                   >
                     <div className="library-add-result-img-wrap">
                       {thumb ? (

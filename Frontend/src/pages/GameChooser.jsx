@@ -80,7 +80,7 @@ function ProgressBlock({ round, total, onRestart }) {
         <span className="progress-pct">{pct}%</span>
       </div>
       {onRestart && (
-        <button className="progress-restart-btn" onClick={onRestart}>
+        <button className="progress-restart-btn" onClick={onRestart} data-sound="sound-click">
           <RotateCcw size={14} /> {t("game.restart")}
         </button>
       )}

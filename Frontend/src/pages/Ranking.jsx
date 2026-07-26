@@ -42,7 +42,7 @@ export function SharedRankingView({ data, onBack }) {
     return (
       <div className="ranking-empty">
         <p>{t("ranking.shareInvalid")}</p>
-        {onBack && <button className="ranking-btn" onClick={onBack}>{t("ranking.goBack")}</button>}
+        {onBack && <button className="ranking-btn" onClick={onBack} data-sound="sound-click">{t("ranking.goBack")}</button>}
       </div>
     );
   }
@@ -66,7 +66,7 @@ export function SharedRankingView({ data, onBack }) {
       </div>
       {onBack && (
         <div className="ranking-actions">
-          <button className="ranking-btn ranking-btn-outline" onClick={onBack}>
+          <button className="ranking-btn ranking-btn-outline" onClick={onBack} data-sound="sound-click">
             {t("ranking.goBack")}
           </button>
         </div>
@@ -113,7 +113,7 @@ export default function Ranking({ ranking = [], onRestart, games }) {
       <div className="ranking-empty">
         <h2>{t("ranking.noRanking")}</h2>
         <p>{t("ranking.startComparing")}</p>
-        <button className="ranking-btn" onClick={onRestart}>{t("ranking.startOver")}</button>
+        <button className="ranking-btn" onClick={onRestart} data-sound="sound-click">{t("ranking.startOver")}</button>
       </div>
     );
   }
@@ -176,14 +176,14 @@ export default function Ranking({ ranking = [], onRestart, games }) {
       </div>
 
       <div className="ranking-actions">
-        <button className="ranking-btn ranking-btn-outline" onClick={onRestart}>
+        <button className="ranking-btn ranking-btn-outline" onClick={onRestart} data-sound="sound-click">
           <RotateCcw size={16} /> {t("ranking.restart")}
         </button>
-        <button className="ranking-btn ranking-btn-primary" onClick={handleSave}>
+        <button className="ranking-btn ranking-btn-primary" onClick={handleSave} data-sound="sound-success">
           {saved ? <Check size={16} /> : <Save size={16} />}
           {saved ? t("ranking.saved") : t("ranking.save")}
         </button>
-        <button className="ranking-btn ranking-btn-outline" onClick={handleShare}>
+        <button className="ranking-btn ranking-btn-outline" onClick={handleShare} data-sound="sound-success">
           <Share2 size={16} /> {t("ranking.share")}
         </button>
       </div>

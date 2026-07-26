@@ -73,6 +73,7 @@ export default function GameCard({ game, onChoose, disabled, side, showImage }) 
           onClick={onChoose}
           disabled={disabled}
           className="game-card-btn"
+          data-sound="sound-select"
         >
           {t("game.choose")}
         </button>

@@ -87,7 +87,7 @@ export function SharedTierView({ data, onBack }) {
     return (
       <div className="tierlist-shared-error">
         <p>{t("tierlist.shareInvalid")}</p>
-        {onBack && <button className="tierlist-shared-back" onClick={onBack}>{t("tierlist.goBack")}</button>}
+        {onBack && <button className="tierlist-shared-back" onClick={onBack} data-sound="sound-click">{t("tierlist.goBack")}</button>}
       </div>
     );
   }
@@ -311,10 +311,10 @@ export default function TierList() {
         <div className="tierlist-header">
           <Layers size={18} />
           <h2>{t("tierlist.title")}</h2>
-          <button className="tierlist-share-btn" onClick={handleShare} title={t("tierlist.share")}>
+          <button className="tierlist-share-btn" onClick={handleShare} title={t("tierlist.share")} data-sound="sound-success">
             <Share2 size={14} />
           </button>
-          <button className="tierlist-clear-all-btn" onClick={resetAll}>
+          <button className="tierlist-clear-all-btn" onClick={resetAll} data-sound="sound-remove">
             <RotateCcw size={14} /> {t("tierlist.clearAll")}
           </button>
         </div>
@@ -327,6 +327,7 @@ export default function TierList() {
               onDragLeave={handleTierDragLeave}
               onDrop={(e) => handleTierDrop(e, key)}
               onClick={() => handleTierClick(key)}
+              data-sound="sound-tierdrop"
             >
               <div
                 className="tier-label"
@@ -349,7 +350,7 @@ export default function TierList() {
                 </AnimatePresence>
               </div>
               {tiers[key].length > 0 && (
-                <button className="tier-clear-btn" onClick={() => resetTier(key)} title={t("tierlist.clear")}>
+                <button className="tier-clear-btn" onClick={() => resetTier(key)} title={t("tierlist.clear")} data-sound="sound-remove">
                   <X size={12} />
                 </button>
               )}
@@ -372,7 +373,7 @@ export default function TierList() {
             className="tierlist-search-input"
           />
           {query && (
-            <button className="tierlist-search-clear" onClick={() => setQuery("")}>
+            <button className="tierlist-search-clear" onClick={() => setQuery("")} data-sound="sound-click">
               <X size={14} />
             </button>
           )}
@@ -423,7 +424,7 @@ export default function TierList() {
         </div>
 
         {hasMore && !loading && (
-          <button className="tierlist-load-more" onClick={loadMore}>
+          <button className="tierlist-load-more" onClick={loadMore} data-sound="sound-click">
             <ChevronDown size={16} /> {t("tierlist.loadMore")}
           </button>
         )}
@@ -443,6 +444,7 @@ function TierGameCard({ game, onClick }) {
       className="tier-game-card"
       onClick={onClick}
       title={t("tierlist.remove")}
+      data-sound="sound-remove"
       layout
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -481,6 +483,7 @@ function BrowserCard({ game, assigned, selected, onDragStart, onDragEnd, onClick
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
+      data-sound="sound-select"
       whileHover={assigned ? {} : { y: -4 }}
       whileTap={assigned ? {} : { scale: 0.96 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}

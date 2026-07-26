@@ -162,7 +162,7 @@ export default function Register({ onRegister, goLogin }) {
             {error && <p className="auth-error" role="alert">{error}</p>}
             {success && <p className="auth-success" role="status">{success}</p>}
 
-            <button type="submit" disabled={!canSubmit || loading} className="auth-submit">
+            <button type="submit" disabled={!canSubmit || loading} className="auth-submit" data-sound="sound-click">
               {loading ? t("auth.creatingAccount") : t("auth.createAccountBtn")}
               <ArrowRight size={16} />
             </button>
@@ -170,7 +170,7 @@ export default function Register({ onRegister, goLogin }) {
 
           <p className="auth-footer-text">
             {t("auth.alreadyHaveAccount")}{" "}
-            <button type="button" onClick={goLogin} className="auth-link">
+            <button type="button" onClick={goLogin} className="auth-link" data-sound="sound-nav">
               {t("auth.signInLink")}
             </button>
           </p>
