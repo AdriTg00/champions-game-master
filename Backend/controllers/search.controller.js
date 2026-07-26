@@ -6,7 +6,9 @@ import { searchSteam } from "../services/steam.service.js";
 import gameDAO from "../repo/gameDAO.js";
 import logger from "../utils/logger.js";
 
-async function searchRawgDirect(query, pageSize) {
+const SOURCE_PRIORITY = ["rawg", "igdb", "steam", "local"];
+
+async function searchRawg(query, pageSize) {
   if (!config.rawgApiKey) return [];
   try {
     const url = `https://api.rawg.io/api/games?key=${config.rawgApiKey}&page_size=${pageSize}&search=${encodeURIComponent(query)}&search_precise=false`;
@@ -25,13 +27,13 @@ async function searchRawgDirect(query, pageSize) {
     }));
   } catch (err) {
     if (err.response?.status !== 401 && err.response?.status !== 403) {
-      logger.error("RAWG direct search error:", { message: err.message });
+      logger.warn("RAWG search failed, will try next source:", { query, message: err.message });
     }
-    return [];
+    return null;
   }
 }
 
-async function searchLocalGamesDirect(query, pageSize) {
+async function searchLocal(query, pageSize) {
   try {
     const filter = query ? { name: { $regex: escapeRegex(query), $options: "i" } } : {};
     const { data } = await gameDAO.findAll({ filter, page: 1, limit: pageSize, sort: { name: 1 } });
@@ -53,37 +55,46 @@ async function searchLocalGamesDirect(query, pageSize) {
   }
 }
 
+const SOURCES = {
+  rawg: searchRawg,
+  igdb: searchIGDB,
+  steam: searchSteam,
+  local: searchLocal,
+};
+
 export async function unifiedSearch(req, res) {
   try {
     const query = (req.query.name || "").trim();
     const pageSize = Math.min(parseInt(req.query.page_size) || 10, 30);
 
     if (!query) {
-      const local = await searchLocalGamesDirect("", pageSize);
-      return res.status(200).json({ games: local });
-    }
-
-    const responses = await Promise.allSettled([
-      searchRawgDirect(query, pageSize),
-      searchIGDB(query, pageSize),
-      searchSteam(query, pageSize),
-      searchLocalGamesDirect(query, pageSize),
-    ]);
-
-    const allGames = [];
-    for (const r of responses) {
-      if (r.status === "fulfilled") allGames.push(...r.value);
+      const games = await searchLocal("", pageSize);
+      return res.status(200).json({ games });
     }
 
     const seen = new Set();
-    const deduped = allGames.filter((g) => {
-      const key = g.name.toLowerCase().trim();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    const results = [];
+    let remaining = pageSize;
 
-    deduped.sort((a, b) => {
+    for (const source of SOURCE_PRIORITY) {
+      if (remaining <= 0) break;
+      const fn = SOURCES[source];
+      if (!fn) continue;
+
+      const games = await fn(query, remaining);
+      if (!games) continue;
+
+      for (const g of games) {
+        if (remaining <= 0) break;
+        const key = g.name.toLowerCase().trim();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        results.push(g);
+        remaining--;
+      }
+    }
+
+    results.sort((a, b) => {
       const aE = a.name.toLowerCase() === query.toLowerCase() ? 0 : 1;
       const bE = b.name.toLowerCase() === query.toLowerCase() ? 0 : 1;
       if (aE !== bE) return aE - bE;
@@ -92,9 +103,9 @@ export async function unifiedSearch(req, res) {
       return aS - bS;
     });
 
-    return res.status(200).json({ games: deduped.slice(0, pageSize) });
+    return res.status(200).json({ games: results });
   } catch (err) {
     logger.error("unifiedSearch error:", { message: err.message });
-    return res.status(500).json({ error: "Error en búsqueda unificada" });
+    return res.status(500).json({ error: "Error en búsqueda" });
   }
 }
